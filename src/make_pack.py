@@ -20,6 +20,41 @@ button(66, (14, 16, 22, 235), (14, 16, 22, 235), (34, 38, 46, 255))
 button(86, (59, 140, 246, 255), (20, 50, 120, 245), (110, 190, 255, 255))
 w.save(out / "widgets.png")
 
+# --- Astra logo mark: a pixel "A" inside a rounded badge with a star spark ---
+def logo_mark(size_px):
+    S = 16  # design grid
+    A = [
+        "....##....",
+        "...####...",
+        "..##..##..",
+        "..##..##..",
+        "..######..",
+        "..##..##..",
+        "..##..##..",
+        "..##..##..",
+    ]
+    img = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    # badge
+    d.rectangle([1, 1, 14, 14], fill=(12, 26, 51, 255))
+    d.rectangle([1, 1, 14, 2], fill=(38, 86, 150, 255))
+    for x, y in [(1, 1), (14, 1), (1, 14), (14, 14)]:
+        img.putpixel((x, y), (0, 0, 0, 0))
+    d.rectangle([1, 1, 14, 14], outline=(79, 179, 255, 255))
+    for x, y in [(1, 1), (14, 1), (1, 14), (14, 14)]:
+        img.putpixel((x, y), (0, 0, 0, 0))
+    # letter A (rows 2..13 of the 16 grid)
+    ox, oy = (S - len(A[0])) // 2, (S - len(A)) // 2
+    for y, row in enumerate(A):
+        for x, c in enumerate(row):
+            if c == "#":
+                img.putpixel((ox + x, oy + y), (255, 255, 255, 255))
+    # spark
+    for x, y in [(12, 3), (11, 3), (13, 3), (12, 2), (12, 4)]:
+        img.putpixel((x, y), (140, 215, 255, 255))
+    return img.resize((size_px, size_px), Image.NEAREST)
+
+
 # --- logo (minecraft.png: halves at (0,0) and (0,45), each 155x44; we use a 2x = 512px texture) ---
 G = {"A": ["01110","10001","10001","11111","10001","10001","10001"],
      "S": ["01111","10000","10000","01110","00001","00001","11110"],
@@ -31,7 +66,7 @@ word, px = "ASTRA", 9
 cols = len(word) * 6 - 1
 logo = Image.new("RGBA", (LW, LH), (0, 0, 0, 0))
 ld = ImageDraw.Draw(logo)
-ox, oy = (LW - cols * px) // 2, 16
+ox, oy = (LW - cols * px) // 2 + 34, 16
 def draw(dx, dy, color):
     for li, ch in enumerate(word):
         for r, row in enumerate(G[ch]):
@@ -52,6 +87,8 @@ for li, ch in enumerate(word):
 cx = LW // 2
 for x0, y0, x1, y1 in [(cx - 2, 0, cx + 2, 9), (cx - 24, 3, cx - 18, 10), (cx + 18, 3, cx + 24, 10)]:
     ld.rectangle([x0, y0, x1, y1], fill=(140, 210, 255, 255))
+mark = logo_mark(LH - 8)
+logo.paste(mark, (ox - mark.width - 10, (LH - mark.height) // 2), mark)
 mc = Image.new("RGBA", (256 * S2, 256 * S2), (0, 0, 0, 0))
 mc.paste(logo.crop((0, 0, LW // 2, LH)), (0, 0))
 mc.paste(logo.crop((LW // 2, 0, LW, LH)), (0, 45 * S2))
@@ -112,3 +149,22 @@ capes = [
 ]
 (out / "capes.json").write_text(json.dumps(capes))
 print("capes written:", len(capes))
+
+logo_mark(256).save(out / "logo.png")
+buf = __import__("io").BytesIO(); logo_mark(64).save(buf, "PNG")
+(out / "logo.b64").write_text(base64.b64encode(buf.getvalue()).decode())
+print("logo written")
+
+
+# --- website imagery (resized + compressed so the page stays small) ---
+def web_img(src_name, out_name, w, h, quality=72):
+    im = Image.open(root / "img" / src_name).convert("RGB")
+    scale = max(w / im.width, h / im.height)
+    im = im.resize((round(im.width * scale), round(im.height * scale)), Image.LANCZOS)
+    left, top = (im.width - w) // 2, (im.height - h) // 2
+    im.crop((left, top, left + w, top + h)).save(out / out_name, "JPEG", quality=quality, optimize=True)
+
+web_img("magic.jpg", "web_hero.jpg", 1600, 900)
+web_img("launcher.jpg", "web_band.jpg", 1600, 620)
+web_img("website.jpg", "web_cta.jpg", 1400, 520, 70)
+print("website images written")

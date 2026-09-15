@@ -38,9 +38,12 @@ def page(hosted_ids, payloads):
     out = out.replace("__PACKFILES__", json.dumps(pack))
     out = out.replace("__CAPES__", json.dumps(capes))
     out = out.replace("__HOSTED__", json.dumps(hosted_ids))
+    out = out.replace("__LOGO__", "data:image/png;base64," + (src / "pack/logo.b64").read_text().strip())
     out = out.replace("__ENGINE__", (src / "engine.js").read_text())
-    for key, img in {"__WEBSITE_BG__": "website.jpg", "__LAUNCHER_BG__": "launcher.jpg"}.items():
-        out = out.replace(key, "data:image/jpeg;base64," + base64.b64encode((src / "img" / img).read_bytes()).decode())
+    imgs = {"__LAUNCHER_BG__": src / "img/launcher.jpg", "__BG_HERO__": src / "pack/web_hero.jpg",
+            "__BG_BAND__": src / "pack/web_band.jpg", "__BG_CTA__": src / "pack/web_cta.jpg"}
+    for key, path in imgs.items():
+        out = out.replace(key, "data:image/jpeg;base64," + base64.b64encode(path.read_bytes()).decode())
     return out.replace("<!--PAYLOADS-->", payloads)  # last, so placeholders inside game files are untouched
 
 available = {i: g for i, g in GAMES.items() if (root / g[0]).exists()}

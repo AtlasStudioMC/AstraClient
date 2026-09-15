@@ -1,0 +1,6 @@
+{
+  "name": "astra-client",
+  "private": true,
+  "description": "Astra Client - Eaglercraft launcher with capes, mods and accounts",
+  "engines": { "node": ">=18" }
+}

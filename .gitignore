@@ -1,0 +1,9 @@
+# original Eaglercraft downloads (inputs to src/build.py)
+Eaglercraft_*.html
+EaglercraftX_*.html
+# offline single-file build (too big for GitHub)
+AstraClient.html
+.DS_Store
+.vercel
+node_modules
+__pycache__

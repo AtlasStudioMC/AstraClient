@@ -107,46 +107,176 @@ bg.save(out / "panorama.png", optimize=True)
 print("pack textures written to", out)
 
 # --- cosmetic capes ---
-# Each cape: a 64x32 PNG (for previews) + Eaglercraft's 1173-byte 23x17 RGB format
-import random, json, base64, math
-def lerp(a, b, t): return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))
-def make_cape(cid, name, top, bottom, accent, style):
-    c = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
-    for y in range(17):
-        for x in range(22):
-            col = lerp(top, bottom, y / 16)
-            if style == "stripes" and (x + y) % 6 < 2: col = lerp(col, accent, .55)
-            if style == "wave" and abs(y - 8 - 3 * math.sin(x / 3)) < 1.2: col = accent
-            if style == "split" and x % 11 < 5: col = lerp(col, accent, .35)
-            c.putpixel((x, y), col + (255,))
-    rnd = random.Random(cid)
-    if style in ("stars", "nebula"):
-        for _ in range(16):
-            c.putpixel((rnd.randrange(1, 21), rnd.randrange(1, 16)), (255, 255, 255, 255))
-    for ox in (1, 12):  # emblem on back and front
-        for dx, dy in [(5, 7), (4, 8), (5, 8), (6, 8), (5, 9), (3, 8), (7, 8), (5, 6), (5, 10)]:
-            c.putpixel((ox + dx - 1, dy), accent + (255,))
-    for y in range(11):  # side strip used by Eaglercraft
-        c.putpixel((22, y + 11), lerp(top, bottom, y / 10) + (255,))
+# The cape people see is a 10x16 "face". We draw that, then build the full 64x32
+# texture (front, back, top and side edges) and Eaglercraft's 1173-byte 23x17 RGB blob.
+import random, json, base64, math, io
+
+W, H = 10, 16  # visible cape face
+
+def mix(a, b, t):
+    t = max(0.0, min(1.0, t))
+    return tuple(round(a[i] + (b[i] - a[i]) * t) for i in range(3))
+
+def shade(c, f):
+    return tuple(max(0, min(255, round(v * f))) for v in c)
+
+EMBLEM_A = [".###.", "#...#", "#...#", "#####", "#...#", "#...#", "#...#"]
+
+def stamp(face, art, ox, oy, color):
+    for y, row in enumerate(art):
+        for x, ch in enumerate(row):
+            if ch == "#" and 0 <= ox + x < W and 0 <= oy + y < H:
+                face[oy + y][ox + x] = color
+
+def frame(face, border, inner=None):
+    for x in range(W):
+        face[0][x] = border; face[H - 1][x] = border
+    for y in range(H):
+        face[y][0] = border; face[y][W - 1] = border
+    if inner:
+        for x in range(1, W - 1):
+            face[1][x] = inner; face[H - 2][x] = inner
+        for y in range(1, H - 1):
+            face[y][1] = inner; face[y][W - 2] = inner
+
+def field(top, bottom, dither=None, rnd=None):
+    face = [[mix(top, bottom, y / (H - 1)) for x in range(W)] for y in range(H)]
+    if dither:  # subtle checker dithering so the gradient does not look flat
+        for y in range(H):
+            for x in range(W):
+                if (x + y) % 2 == 0:
+                    face[y][x] = shade(face[y][x], dither)
+    return face
+
+def cape_astra():
+    face = field((36, 96, 190), (7, 18, 42), 0.94)
+    frame(face, (79, 179, 255), (18, 44, 88))
+    stamp(face, EMBLEM_A, 2, 5, (255, 255, 255))
+    for x, y in [(7, 4), (6, 4), (8, 4), (7, 3), (7, 5)]:
+        face[y][x] = (150, 220, 255)
+    return face
+
+def cape_nebula():
+    rnd = random.Random("nebula")
+    face = field((108, 56, 200), (10, 6, 32), 0.9)
+    for y in range(H):  # glowing core
+        for x in range(W):
+            d = math.hypot((x - 4.5) / 4.0, (y - 7.5) / 6.0)
+            if d < 1:
+                face[y][x] = mix(face[y][x], (215, 160, 255), (1 - d) * 0.55)
+    for _ in range(14):
+        face[rnd.randrange(1, H - 1)][rnd.randrange(1, W - 1)] = (255, 255, 255)
+    frame(face, (60, 26, 120))
+    return face
+
+def cape_ocean():
+    face = field((44, 190, 214), (4, 40, 86), 0.95)
+    for y in range(1, H - 1):  # rolling wave crests
+        for x in range(W):
+            wave = math.sin((x / W) * math.pi * 2 + y * 0.55) * 1.1
+            if abs(((y + 1.5) % 3.5) - 1.75 + wave) < 0.55:
+                face[y][x] = mix(face[y][x], (225, 255, 255), 0.8)
+    frame(face, (12, 74, 120), (20, 120, 165))
+    return face
+
+def cape_aurora():
+    face = field((10, 22, 46), (4, 8, 20), 0.95)
+    for x in range(W):  # vertical ribbons
+        top = 1 + (x * 3) % 4
+        height = 6 + ((x * 5) % 5)
+        for y in range(top, min(H - 1, top + height)):
+            t = (y - top) / height
+            face[y][x] = mix(mix((90, 255, 170), (70, 150, 255), x / (W - 1)), face[y][x], t)
+    frame(face, (16, 44, 70))
+    return face
+
+def cape_frost():
+    face = field((238, 248, 255), (110, 165, 215), 0.97)
+    flake = ["#.#.#", ".###.", "#####", ".###.", "#.#.#"]
+    stamp(face, flake, 2, 6, (255, 255, 255))
+    for y in range(H):
+        for x in range(W):
+            if (x * 3 + y * 5) % 11 == 0:
+                face[y][x] = shade(face[y][x], 1.06)
+    frame(face, (52, 104, 168), (150, 200, 235))
+    return face
+
+def cape_midnight():
+    rnd = random.Random("midnight")
+    face = field((26, 30, 48), (5, 6, 12), 0.92)
+    moon = ["..###.", ".##..#", "###...", "###...", ".##..#", "..###."]
+    stamp(face, moon, 2, 4, (240, 244, 255))
+    glow = [".####.", "##..##", "##....", "##....", "##..##", ".####."]
+    for y, row in enumerate(glow):  # soft halo around the crescent
+        for x, ch in enumerate(row):
+            px, py = 1 + x, 3 + y
+            if ch == "#" and 0 < px < W - 1 and 0 < py < H - 1 and face[py][px][0] < 200:
+                face[py][px] = mix(face[py][px], (120, 150, 210), 0.3)
+    for _ in range(10):  # stars below the moon
+        face[rnd.randrange(10, H - 1)][rnd.randrange(1, W - 1)] = (200, 220, 255)
+    frame(face, (79, 179, 255))
+    return face
+
+def cape_ember():
+    face = field((34, 10, 14), (14, 5, 8), 0.95)
+    # classic dithered fire ramp: hottest at the hem, fading out halfway up
+    ramp = [(255, 238, 170), (255, 186, 70), (240, 120, 36), (196, 62, 24), (110, 28, 18)]
+    for y in range(H - 1, 3, -1):
+        t = (H - 1 - y) / (H - 5)
+        idx = min(len(ramp) - 1, int(t * len(ramp)))
+        c = ramp[idx]
+        nxt = ramp[min(len(ramp) - 1, idx + 1)]
+        for x in range(W):
+            checker = (x + y) % 2 == 0
+            face[y][x] = c if not checker else mix(c, nxt, 0.75)
+    for x, y in [(2, 5), (5, 4), (7, 6), (4, 7), (8, 8)]:  # rising sparks
+        face[y][x] = mix(face[y][x], (255, 208, 120), 0.85)
+    frame(face, (120, 34, 20), (60, 16, 12))
+    return face
+
+def cape_void():
+    face = [[(0, 0, 0) for _ in range(W)] for _ in range(H)]
+    for y in range(H):  # portal rings
+        for x in range(W):
+            d = math.hypot((x - 4.5) / 4.2, (y - 7.5) / 7.0)
+            ring = (math.sin(d * 7.5 - 1.2) + 1) / 2
+            glow = ring * max(0.0, 1.15 - d) ** 0.5
+            face[y][x] = mix((10, 3, 20), (190, 110, 255), min(1, glow * 1.25))
+    frame(face, (92, 40, 160))
+    return face
+
+DESIGNS = [("astra", "Astra", cape_astra), ("nebula", "Nebula", cape_nebula), ("ocean", "Ocean", cape_ocean),
+           ("aurora", "Aurora", cape_aurora), ("frost", "Frost", cape_frost), ("midnight", "Midnight", cape_midnight),
+           ("ember", "Ember", cape_ember), ("void", "Void", cape_void)]
+
+def build_cape(cid, name, make):
+    face = make()
+    img = Image.new("RGBA", (64, 32), (0, 0, 0, 0))
+    edge = face[H // 2][0]
+    for y in range(H):
+        for x in range(W):
+            img.putpixel((1 + x, 1 + y), face[y][x] + (255,))          # outer face
+            img.putpixel((12 + x, 1 + y), shade(face[y][x], 0.82) + (255,))  # inner face
+    for x in range(W):                                                  # top and bottom strips
+        img.putpixel((1 + x, 0), face[0][x] + (255,))
+        img.putpixel((12 + x, 0), shade(face[0][x], 0.82) + (255,))
+    for y in range(H):                                                  # side edges
+        img.putpixel((0, 1 + y), shade(face[y][0], 0.9) + (255,))
+        img.putpixel((11, 1 + y), shade(face[y][W - 1], 0.9) + (255,))
+    # Eaglercraft's packed format: 23x17 BGR, plus the side strip it reads from x=22
     data = bytearray(1173)
     for y in range(17):
         for x in range(22):
-            r, g, b, _ = c.getpixel((x, y)); i = (y * 23 + x) * 3; data[i:i + 3] = bytes((b, g, r))
+            r, g, b, _ = img.getpixel((x, y)); i = (y * 23 + x) * 3
+            data[i:i + 3] = bytes((b, g, r))
     for y in range(11):
-        r, g, b, _ = c.getpixel((22, y + 11)); i = ((y + 6) * 23 + 22) * 3; data[i:i + 3] = bytes((b, g, r))
-    buf = __import__("io").BytesIO(); c.save(buf, "PNG")
-    return {"id": cid, "name": name, "png": base64.b64encode(buf.getvalue()).decode(), "data": base64.b64encode(bytes(data)).decode()}
+        r, g, b, _ = img.getpixel((11, min(16, y + 1))); i = ((y + 6) * 23 + 22) * 3
+        data[i:i + 3] = bytes((b, g, r))
+    buf = io.BytesIO(); img.save(buf, "PNG")
+    return {"id": cid, "name": name, "png": base64.b64encode(buf.getvalue()).decode(),
+            "data": base64.b64encode(bytes(data)).decode()}
 
-capes = [
-    make_cape("astra", "Astra", (40, 120, 255), (8, 22, 60), (170, 225, 255), "stars"),
-    make_cape("nebula", "Nebula", (140, 70, 255), (20, 10, 60), (255, 190, 255), "nebula"),
-    make_cape("ocean", "Ocean", (30, 200, 220), (5, 40, 80), (220, 255, 255), "wave"),
-    make_cape("aurora", "Aurora", (40, 230, 150), (20, 40, 110), (200, 255, 230), "wave"),
-    make_cape("frost", "Frost", (220, 240, 255), (90, 140, 200), (40, 90, 170), "stripes"),
-    make_cape("midnight", "Midnight", (30, 34, 50), (5, 6, 12), (79, 179, 255), "split"),
-    make_cape("ember", "Ember", (255, 120, 60), (80, 10, 20), (255, 220, 120), "stripes"),
-    make_cape("void", "Void", (60, 10, 90), (0, 0, 0), (180, 90, 255), "stars"),
-]
+capes = [build_cape(*d) for d in DESIGNS]
 (out / "capes.json").write_text(json.dumps(capes))
 print("capes written:", len(capes))
 

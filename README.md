@@ -9,8 +9,8 @@ Versions: EaglercraftX 1.8.8 (JS and WASM-GC), Eaglercraft 1.12.2, Eaglercraft 1
 1. Import this repo in Vercel (no build command, output is the repo root).
 2. Accounts need two things in **Project Settings**:
    - **Storage → Marketplace → Upstash for Redis** (connect it to the project; it adds `KV_REST_API_URL` and `KV_REST_API_TOKEN`).
-   - **Environment Variables → `AUTH_SECRET`**: a long random string, e.g. the output of `openssl rand -hex 32`.
-3. Redeploy. Without these the site and games still work, only log in / sign up is disabled.
+   - Optional: **Environment Variables → `AUTH_SECRET`**, a long random string (`openssl rand -hex 32`). If you skip it, one is derived from the database token.
+3. Redeploy (env vars only apply to new deployments). Without these the site and games still work, only log in / sign up is disabled.
 
 ## Project layout
 

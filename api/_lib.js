@@ -2,13 +2,23 @@
 // Storage: Upstash Redis REST (Vercel Marketplace "Upstash for Redis" sets these env vars).
 const crypto = require("crypto");
 
-const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-const SECRET = process.env.AUTH_SECRET;
+// Vercel may prefix these (e.g. STORAGE_KV_REST_API_URL), so match by suffix
+function env(...suffixes) {
+  for (const suf of suffixes) {
+    if (process.env[suf]) return process.env[suf];
+    const key = Object.keys(process.env).find((k) => k.endsWith("_" + suf) && process.env[k]);
+    if (key) return process.env[key];
+  }
+}
+const REDIS_URL = env("KV_REST_API_URL", "UPSTASH_REDIS_REST_URL");
+const REDIS_TOKEN = env("KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN");
+// AUTH_SECRET is optional: fall back to a key derived from the private database token
+const SECRET = process.env.AUTH_SECRET ||
+  (REDIS_TOKEN ? crypto.createHash("sha256").update("astra-session:" + REDIS_TOKEN).digest("hex") : undefined);
 const SESSION_DAYS = 30;
 
 async function redis(...cmd) {
-  if (!REDIS_URL || !REDIS_TOKEN) throw httpError(500, "Accounts are not configured on this server yet");
+  if (!REDIS_URL || !REDIS_TOKEN) throw httpError(500, "Accounts need a database: connect Upstash for Redis in Vercel, then redeploy");
   const res = await fetch(REDIS_URL, {
     method: "POST",
     headers: { authorization: `Bearer ${REDIS_TOKEN}`, "content-type": "application/json" },

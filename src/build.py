@@ -22,11 +22,44 @@ capes = [{k: c[k] for k in ("id", "name", "png", "data")} for c in json.loads((s
 overlay = ("window.ASTRA_CAPES=" + json.dumps([{"id": c["id"], "name": c["name"], "png": c["png"]} for c in capes]) + ";\n"
            + (src / "astra-overlay.js").read_text())
 
-def game_bytes(fn, db):
+# swap the upstream client branding for Astra in the strings the game shows on screen
+REBRAND = {
+    "v18": [("EaglercraftX 1.8-u53 ultimate [", "Astra Client 1.8.8 ["),
+            ("EaglercraftX 1.8-u53 - ", "Astra Client 1.8.8 - "),
+            ("EaglercraftX 1.8 u53", "Astra Client 1.8.8"),
+            ("EaglercraftX u53", "Astra Client")],
+    "v18w": [("EaglercraftX 1.8-u53 ultimate [", "Astra Client 1.8.8 ["),
+             ("EaglercraftX 1.8-u53 - ", "Astra Client 1.8.8 - ")],
+    "v112": [("Eaglercraft 1.12.2 (u3)", "Astra Client 1.12.2"),
+             ("Eaglercraft 1.12.2 1.12.2-u3 - ", "Astra Client 1.12.2 - ")],
+    "v152": [("eaglercraft 1.5.2-sp2.01 official", "Astra Client 1.5.2"),
+             ("Eaglercraft: 1.5.2-sp2.01", "Astra Client: 1.5.2")],
+}
+TITLES = {"v18": "Astra Client 1.8.8", "v18w": "Astra Client 1.8.8", "v112": "Astra Client 1.12.2", "v152": "Astra Client 1.5.2"}
+
+def rebrand(html, id_):
+    pairs = REBRAND.get(id_, [])
+    # EaglercraftX 1.8 ships its client code gzipped inside a <style> tag, so patch in there too
+    tag = '<style type="eaglercraft" id="eaglercraftXClientBundle">data:application/octet-stream;base64,'
+    at = html.find(tag)
+    if at >= 0:
+        start = at + len(tag)
+        end = html.index("<", start)
+        code = gzip.decompress(base64.b64decode(html[start:end])).decode("utf-8")
+        for a, b in pairs:
+            code = code.replace(a, b)
+        html = html[:start] + base64.b64encode(gzip.compress(code.encode("utf-8"), 9, mtime=0)).decode() + html[end:]
+    else:
+        for a, b in pairs:
+            html = html.replace(a, b)
+    import re as _re
+    return _re.sub(r"<title>.*?</title>", "<title>" + TITLES.get(id_, "Astra Client") + "</title>", html, count=1, flags=_re.S)
+
+def game_bytes(fn, db, id_):
     html = (root / fn).read_text(encoding="utf-8")
     if db:  # separate world saves per version so they don't clash
         html = html.replace('worldsDB: "worlds"', f'worldsDB: "{db}"', 1)
-    html = html.replace("<title>My Drive - Google Drive</title>", "<title>Eaglercraft 1.5.2</title>", 1)
+    html = rebrand(html, id_)
     idx = html.rfind("</body>")
     html = html[:idx] + "<script>" + overlay.replace("</script", "<\\/script") + "</script>\n" + html[idx:]
     return gzip.compress(html.encode("utf-8"), 9, mtime=0)
@@ -55,7 +88,7 @@ games_dir = root / "games"
 games_dir.mkdir(exist_ok=True)
 blocks = []
 for id_, (fn, db) in available.items():
-    data = game_bytes(fn, db)
+    data = game_bytes(fn, db, id_)
     (games_dir / f"{id_}.bin").write_bytes(data)
     print(f"games/{id_}.bin", round(len(data) / 1e6, 1), "MB")
     if "--no-offline" not in sys.argv:

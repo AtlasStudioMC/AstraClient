@@ -1,8 +1,8 @@
 # Astra Client
 
-Eaglercraft launcher website with a blue Astra title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
+Browser Minecraft launcher website with a blue Astra title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
 
-Versions: EaglercraftX 1.8.8 (JS and WASM-GC), Eaglercraft 1.12.2, Eaglercraft 1.5.2.
+Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2.
 
 ## Deploying on Vercel
 
@@ -27,10 +27,12 @@ Versions: EaglercraftX 1.8.8 (JS and WASM-GC), Eaglercraft 1.12.2, Eaglercraft 1
 
 ## Rebuilding
 
-Put the original Eaglercraft offline files in the project root, then:
+Put the original offline game HTML files in the project root, then:
 
 ```bash
 python3 src/make_pack.py && python3 src/build.py
 ```
 
-Eaglercraft is made by lax1dude, ayunami2000 and contributors. Not affiliated with Mojang or Microsoft.
+## Credits
+
+Astra is a launcher and mod layer built on the open-source browser ports of Minecraft by lax1dude, ayunami2000 and contributors. Minecraft is a trademark of Mojang Studios; Astra is not affiliated with Mojang or Microsoft.

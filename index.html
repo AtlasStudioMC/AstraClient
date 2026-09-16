@@ -214,7 +214,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
   <header class="hero" id="top">
     <div class="wrap">
       <h1>ASTRA</h1>
-      <p>Eaglercraft with capes, a mod menu and a cleaner title screen. Runs in your browser, nothing to install.</p>
+      <p>Minecraft with capes, a mod menu and a cleaner title screen. Runs in your browser, nothing to install.</p>
       <div class="row">
         <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
         <a class="btn big" href="#versions">See versions</a>
@@ -232,7 +232,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
 
     <section class="block" id="cosmetics">
       <h2 class="title">Capes</h2>
-      <p class="sub">Pick one in the launcher and it's on your player when the game starts. It goes through Eaglercraft's own cape system, so other players on the server see it too. 1.8.8 and 1.12.2 only.</p>
+      <p class="sub">Pick one in the launcher and it's on your player when the game starts. It uses the game's built-in cape system, so other players on the server see it too. 1.8.8 and 1.12.2 only.</p>
       <div class="capes-show" id="siteCapes"></div>
     </section>
 
@@ -248,7 +248,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
         <div class="fitem"><div class="ficon"><i data-ico="brush"></i></div><div><h3>Title screen</h3><p>Astra logo, dark buttons and a new background on the main menu (1.8.8 and 1.12.2).</p></div></div>
         <div class="fitem"><div class="ficon"><i data-ico="cape"></i></div><div><h3>Capes</h3><p>Eight capes to pick from, plus a username you set once and keep.</p></div></div>
         <div class="fitem"><div class="ficon"><i data-ico="user"></i></div><div><h3>Accounts</h3><p>Make an Astra account and your cape, mods and HUD layout follow you to any computer.</p></div></div>
-        <div class="fitem"><div class="ficon"><i data-ico="users"></i></div><div><h3>Multiplayer</h3><p>Join Eaglercraft servers, or open your singleplayer world to friends through relays.</p></div></div>
+        <div class="fitem"><div class="ficon"><i data-ico="users"></i></div><div><h3>Multiplayer</h3><p>Join browser-Minecraft servers, or open your singleplayer world to friends through relays.</p></div></div>
       </div>
     </div>
   </section>
@@ -256,10 +256,11 @@ i[data-ico] svg{width:100%;height:100%;display:block}
   <div class="wrap">
     <section class="block" id="faq">
       <h2 class="title">FAQ</h2>
-      <details class="faq"><summary>Which version should I pick?</summary><p>1.8.8 is the most stable and what most servers run. 1.8.8 WASM is the same game but faster on recent Chrome and Edge. 1.12.2 has newer blocks and mobs but is still early and buggy. 1.5.2 is the original classic.</p></details>
+      <details class="faq"><summary>Which version should I pick?</summary><p>1.8.8 is the most stable and what most servers run. 1.8.8 WASM is the same game but faster on recent Chrome and Edge. 1.12.2 has newer blocks and mobs but is still early and buggy. 1.5.2 is the oldest and lightest.</p></details>
       <details class="faq"><summary>Do I need an account?</summary><p>No. Everything works without one and saves in your browser. An account just keeps your cape, mods and HUD layout when you switch devices.</p></details>
       <details class="faq"><summary>Why no capes on 1.5.2?</summary><p>1.5.2 uses an older profile format without custom capes, so it only gets the mod menu.</p></details>
-      <details class="faq"><summary>Is there 1.21?</summary><p>Not yet. The community 1.21 ports we tried freeze before the main menu. It'll be added once one actually works.</p></details>
+      <details class="faq"><summary>Is there 1.21?</summary><p>Not yet. The 1.21 browser ports we tried freeze before the main menu. It'll be added once one actually works.</p></details>
+      <details class="faq" id="credits"><summary>Credits</summary><p>Astra is a launcher and mod layer built on the open-source browser ports of Minecraft by lax1dude, ayunami2000 and contributors. Minecraft is a trademark of Mojang Studios; Astra is not affiliated with Mojang or Microsoft.</p></details>
       <details class="faq"><summary>Where are my worlds saved?</summary><p>In your browser's storage for this site. Clearing site data deletes them, so back up worlds you care about from inside the game.</p></details>
     </section>
   </div>
@@ -273,7 +274,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
 
   <footer class="foot">
     <span class="brand" style="font-size:1rem"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAABFElEQVR4nO3bsU3EMBSH8S9/uWUC1rgNrkZsgcQUHFOcQKJiAkRNBSU9DS0swABHTQpHFne5wOdfF/nFzy7ei2wp0HWd2TAVcP642/GHPZwN1T0GuSAX5MpUzb/db1myi+vLH8+3V9vqfsY9IcgFuSBXpgI+X+5Yks3Ta1NPeH6vzxfkglyQK3Mn/Pqo1/DJ6ao6vlmvqj1hPL6+qecLckEuyJVj1/xUfGtPaBXkglyQK0v7zo/fb+0JrYJckAtyQS7IBbkgV+ZO2Ho2OLQgF+SCXJk7YetZ4NCCXJALckEuyAW5IBfkglyQC3Jl3xP+9t5+3/f+U4JckAtyQS7IBbkgN0wF9H+G/rkgl2MvoOu6jiP6BrNeOglgkTVuAAAAAElFTkSuQmCC" alt=""><span>ASTRA</span></span>
-    <span>Built on Eaglercraft by lax1dude, ayunami2000 and contributors. Not affiliated with Mojang or Microsoft.</span>
+    <span><a href="#credits" id="creditsLink">Credits</a> &middot; Not affiliated with Mojang or Microsoft.</span>
   </footer>
 </div>
 
@@ -548,10 +549,10 @@ const load=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem
 let save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 const VERSIONS=[
-  {id:"v18",name:"1.8.8",full:"EaglercraftX 1.8.8 u53",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
-  {id:"v18w",name:"1.8.8 WASM",full:"EaglercraftX 1.8.8 u53 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
-  {id:"v112",name:"1.12.2",full:"Eaglercraft 1.12.2 u3",desc:"Newer blocks and mobs, early development",tag:["Newest",""],theme:true,cos:true},
-  {id:"v152",name:"1.5.2",full:"Eaglercraft 1.5.2 sp2.01",desc:"The classic original Eaglercraft",tag:["Classic","gray"],theme:false,cos:false}
+  {id:"v18",name:"1.8.8",full:"Astra 1.8.8",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
+  {id:"v18w",name:"1.8.8 WASM",full:"Astra 1.8.8 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
+  {id:"v112",name:"1.12.2",full:"Astra 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Newest",""],theme:true,cos:true},
+  {id:"v152",name:"1.5.2",full:"Astra 1.5.2",desc:"The classic original build",tag:["Classic","gray"],theme:false,cos:false}
 ].filter(v=>document.getElementById(v.id)||(window.ASTRA_HOSTED||[]).includes(v.id));
 
 let session=load("astra.session",{token:"",user:""});

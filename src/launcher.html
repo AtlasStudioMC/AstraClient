@@ -50,32 +50,29 @@ nav.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:1.6
 .wrap{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
 
 /* hero */
-.hero{position:relative;background:url(__BG_HERO__) center 40%/cover;border-bottom:2px solid #16253d;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,rgba(6,12,22,.95) 0%,rgba(6,12,22,.78) 42%,rgba(6,12,22,.35) 100%)}
-.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(180deg,transparent,var(--bg))}
-.hero .wrap{position:relative;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:2.5rem;align-items:center;padding-block:clamp(3rem,7vw,5.5rem)}
-.lockup{display:flex;align-items:center;gap:.8rem;margin-bottom:.2rem}
-.lockup img{width:clamp(48px,7vw,74px);height:clamp(48px,7vw,74px);image-rendering:pixelated}
-.hero h1{font-family:var(--px);font-size:clamp(2.6rem,7vw,4.6rem);line-height:1;color:#fff;text-shadow:4px 4px 0 #1f6fc2}
-.hero .tagline{font-size:clamp(1.02rem,1.6vw,1.2rem);color:#d5e2f2;line-height:1.6;max-width:30rem;margin:.9rem 0 1.3rem}
-.hero .row{display:flex;gap:.6rem;flex-wrap:wrap}
-.quickrow{margin-top:1.4rem;display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
-.quickrow span{color:#96abc8;font-size:.82rem;margin-right:.2rem}
-.chip-v{background:#0e1e33cc;border:2px solid #24405f;padding:.35rem .7rem;font-family:var(--px);font-size:.82rem;color:#cfe2f8}
-.chip-v:hover{border-color:var(--accent);color:#fff}
-/* HUD preview card */
-.preview-card{background:#080f1de6;border:2px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.45)}
-.preview-card .bar{display:flex;align-items:center;gap:.4rem;padding:.5rem .7rem;border-bottom:2px solid var(--line);color:#8fa8c8;font-size:.78rem;font-weight:600}
-.preview-card .dot{width:8px;height:8px;background:#24405f}
-.preview-card .body{padding:1rem;display:flex;gap:1rem;align-items:flex-start;background:url(__BG_BAND__) center/cover;background-blend-mode:multiply;background-color:#0b1524}
-.hudp{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:700}
-.hudp .pill{background:rgba(5,11,24,.62);border-left:2px solid var(--accent);padding:4px 7px}
-.hudp .keys{display:grid;grid-template-columns:repeat(3,22px);gap:2px;margin-top:2px}
-.hudp .keys div{height:22px;display:grid;place-items:center;background:rgba(5,11,24,.62);font-size:9px}
-.hudp .keys div.lit{background:var(--accent);color:#04121f}
-.hudp .keys .w3{grid-column:span 3;height:11px}
-.preview-card .cap{margin-left:auto;text-align:center;color:#b9cde8;font-size:.72rem}
-.preview-card .cap canvas{image-rendering:pixelated;width:52px;height:80px;display:block;margin-bottom:.3rem}
+.hero{position:relative;background:url(__BG_HERO__) center 58%/cover;border-bottom:2px solid #16253d;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:linear-gradient(95deg,rgba(5,10,20,.96) 0%,rgba(5,10,20,.85) 34%,rgba(5,10,20,.45) 62%,rgba(5,10,20,.25) 100%)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,transparent,var(--bg))}
+.hero .wrap{position:relative;min-height:min(72vh,620px);display:flex;flex-direction:column;justify-content:center;padding-block:clamp(3.5rem,9vw,6rem)}
+.lockup{display:flex;align-items:center;gap:clamp(.7rem,1.6vw,1.1rem)}
+.lockup img{width:clamp(56px,8vw,96px);height:clamp(56px,8vw,96px);image-rendering:pixelated}
+.hero h1{font-family:var(--px);font-size:clamp(3rem,9vw,6rem);line-height:.92;color:#fff;letter-spacing:.02em;text-shadow:5px 5px 0 #14508f}
+.hero .tagline{font-size:clamp(1.05rem,1.8vw,1.35rem);color:#dbe7f5;line-height:1.5;max-width:30ch;margin:1.2rem 0 0}
+.hero .row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.8rem}
+.hero .meta{margin-top:1.3rem;color:#8fa6c4;font-size:.86rem;display:flex;gap:.9rem;flex-wrap:wrap;align-items:center}
+.hero .meta b{color:#cfe2f8;font-weight:700}
+.hero .meta .sep{width:3px;height:3px;background:#44618a}
+/* HUD floating over the artwork, the way it looks in game */
+.hudfloat{position:absolute;right:clamp(28px,7vw,110px);top:56%;transform:translateY(-50%);pointer-events:none;opacity:.96}
+.hudfloat .stack{display:flex;flex-direction:column;gap:6px;font:700 13px/1 var(--ui);color:#fff}
+.hudfloat .pill{background:rgba(5,11,24,.55);border-left:3px solid var(--accent);padding:6px 9px;backdrop-filter:blur(2px)}
+.hudfloat .keys{display:grid;grid-template-columns:repeat(3,26px);gap:3px;margin-top:4px}
+.hudfloat .keys div{height:26px;display:grid;place-items:center;background:rgba(5,11,24,.55);font-size:10px;font-weight:700}
+.hudfloat .keys div.lit{background:var(--accent);color:#04121f}
+.hudfloat .keys .w3{grid-column:span 3;height:12px}
+.hudfloat .capeside{text-align:center;color:#c8dbf2;font-size:.72rem;text-shadow:0 1px 3px #000}
+.hudfloat .capeside canvas{image-rendering:pixelated;width:62px;height:96px;display:block;margin-bottom:.35rem;filter:drop-shadow(0 10px 16px rgba(0,0,0,.55))}
+@media (max-width:1100px){.hudfloat{display:none}}
 
 /* sections */
 section.block{padding-block:clamp(3rem,6vw,4.5rem)}
@@ -86,8 +83,8 @@ p.sub{color:var(--muted);max-width:40rem;line-height:1.65;margin-top:.5rem}
 
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}
-.step{background:var(--panel);border:2px solid var(--line);padding:1.1rem 1.2rem;display:flex;flex-direction:column;gap:.4rem}
-.step b{font-family:var(--px);color:var(--accent);font-size:1.1rem}
+.step{border-top:2px solid var(--accent);padding:1.1rem .2rem 0;display:flex;flex-direction:column;gap:.35rem}
+.step b{font-family:var(--px);color:#3f5f8a;font-size:1.6rem;line-height:1}
 .step h3{font-size:1rem}
 .step p{color:var(--muted);font-size:.9rem;line-height:1.55}
 
@@ -275,30 +272,23 @@ i[data-ico] svg{width:100%;height:100%;display:block}
 
   <header class="hero" id="top">
     <div class="wrap">
-      <div>
-        <div class="lockup"><img src="__LOGO__" alt=""><h1>ASTRA</h1></div>
-        <p class="tagline">Minecraft in your browser, with capes, an in-game mod menu and a title screen that doesn't look stock. Pick a version and play - nothing to install.</p>
-        <div class="row">
-          <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
-          <a class="btn big" href="#versions">Browse versions</a>
-        </div>
-        <div class="quickrow" id="quickrow"><span>Jump straight in:</span></div>
+      <div class="lockup"><img src="__LOGO__" alt=""><h1>ASTRA</h1></div>
+      <p class="tagline">Minecraft in your browser, with capes and a proper mod menu.</p>
+      <div class="row">
+        <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
+        <a class="btn big" href="#versions">Browse versions</a>
       </div>
-      <div class="preview-card" aria-hidden="true">
-        <div class="bar"><span class="dot"></span>In-game HUD</div>
-        <div class="body">
-          <div class="hudp">
-            <div class="pill">248 FPS</div>
-            <div class="pill">7 | 2 CPS</div>
-            <div class="pill">4:21 PM</div>
-            <div class="keys">
-              <div></div><div class="lit">W</div><div></div>
-              <div>A</div><div>S</div><div class="lit">D</div>
-              <div>LMB</div><div></div><div>RMB</div>
-              <div class="w3 lit"></div>
-            </div>
-          </div>
-          <div class="cap"><canvas width="11" height="17" id="heroCape"></canvas>Astra cape</div>
+      <div class="meta"><b>4</b> versions <span class="sep"></span> <b>8</b> capes <span class="sep"></span> <b>11</b> mods <span class="sep"></span> no install</div>
+    </div>
+    <div class="hudfloat" aria-hidden="true">
+      <div class="stack">
+        <div class="pill">248 FPS</div>
+        <div class="pill">7 | 2 CPS</div>
+        <div class="keys">
+          <div></div><div class="lit">W</div><div></div>
+          <div>A</div><div>S</div><div class="lit">D</div>
+          <div>LMB</div><div></div><div>RMB</div>
+          <div class="w3 lit"></div>
         </div>
       </div>
     </div>
@@ -514,7 +504,6 @@ async function drawCape(canvas,cape){
 
 /* ---------- website ---------- */
 /* ---------- website ---------- */
-$("#quickrow").insertAdjacentHTML("beforeend",VERSIONS.map(v=>`<button class="chip-v" data-launch="${v.id}">${v.name}</button>`).join(""));
 $("#siteVersions").innerHTML=VERSIONS.map(v=>`<div class="vrow${v.tag[0]==="Recommended"?" rec":""}"><div class="vnum">${v.name}</div><div><h3>${v.full} <span class="tag ${v.tag[1]}">${v.tag[0]}</span></h3><p>${v.desc}.${v.cos?"":" Mod menu only, no capes."}</p></div><button class="btn primary" data-launch="${v.id}"><i data-ico="play"></i>Play</button></div>`).join("");
 $("#siteCapes").innerHTML=ASTRA_CAPES.map(c=>`<button class="cape-tile" data-cape="${c.id}"><canvas width="11" height="17"></canvas><b>${c.name}</b><small>Equip</small></button>`).join("");
 $$("#siteCapes .cape-tile").forEach(b=>{
@@ -522,7 +511,6 @@ $$("#siteCapes .cape-tile").forEach(b=>{
   drawCape(b.querySelector("canvas"),c);
   b.onclick=()=>{cos.cape=c.id;save("astra.cosmetics",cos);renderCosmetics();renderChip();openApp("cosmetics")};
 });
-drawCape($("#heroCape"),ASTRA_CAPES[0]);
 
 // mobile menu
 $("#navToggle").onclick=()=>$("#navlinks").classList.toggle("open");

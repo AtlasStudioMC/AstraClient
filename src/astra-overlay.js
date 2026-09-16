@@ -6,6 +6,7 @@
     fps: true, cps: true, keystrokes: true, clock: false, session: false, memory: false, battery: false,
     crosshair: false, crosshairStyle: "plus", zoom: true, zoomKey: "KeyC", zoomLevel: 3,
     filter: false, brightness: 110, saturation: 115, fullscreenKey: true,
+    afk: false, afkMinutes: 5, titleFlash: false,
     hudColor: "#4fb3ff", hudBg: 60, hudScale: 100
   };
   var cfg = load(MODS_KEY, DEFAULTS);
@@ -160,6 +161,36 @@
   addEventListener("mouseup", function (e) { if (e.button === 0) lmb.classList.remove("on"); if (e.button === 2) rmb.classList.remove("on"); }, true);
   addEventListener("resize", renderHud);
 
+  /* ---------------- AFK alert + focus reminder ---------------- */
+  var lastActivity = Date.now(), flashTimer = null, originalTitle = document.title, flashOn = false;
+  ["keydown", "mousedown", "mousemove", "wheel"].forEach(function (t) {
+    addEventListener(t, function () { lastActivity = Date.now(); }, true);
+  });
+  function startFlash(text) {
+    if (flashTimer) return;
+    originalTitle = document.title;
+    flashTimer = setInterval(function () {
+      flashOn = !flashOn;
+      document.title = flashOn ? text : originalTitle;
+    }, 1000);
+  }
+  function stopFlash() {
+    if (!flashTimer) return;
+    clearInterval(flashTimer); flashTimer = null;
+    document.title = originalTitle;
+  }
+  setInterval(function () {
+    if (cfg.afk && Date.now() - lastActivity > cfg.afkMinutes * 60000) startFlash("AFK - come back!");
+    else if (!(cfg.titleFlash && document.hidden)) stopFlash();
+  }, 2000);
+  if (typeof document.hidden !== "undefined") {
+    document.addEventListener("visibilitychange", function () {
+      if (cfg.titleFlash && document.hidden) startFlash("Come back to Astra!");
+      else if (!cfg.afk || Date.now() - lastActivity <= cfg.afkMinutes * 60000) stopFlash();
+    });
+  }
+
+
   /* ---------------- mod menu ---------------- */
   var MODS = [
     { id: "fps", name: "FPS Counter", cat: "HUD", desc: "Frames per second." },
@@ -175,7 +206,10 @@
       opts: [["zoomKey", "Key", "select", [["KeyC", "C"], ["KeyZ", "Z"], ["KeyV", "V"], ["AltLeft", "Left Alt"]]], ["zoomLevel", "Zoom", "range", [2, 6, 1]]] },
     { id: "filter", name: "Color Filter", cat: "Visual", desc: "Brighten and boost colors.",
       opts: [["brightness", "Brightness", "range", [60, 160, 5]], ["saturation", "Saturation", "range", [0, 200, 5]]] },
-    { id: "fullscreenKey", name: "F11 Fullscreen", cat: "Utility", desc: "Press F11 to toggle fullscreen." }
+    { id: "fullscreenKey", name: "F11 Fullscreen", cat: "Utility", desc: "Press F11 to toggle fullscreen." },
+    { id: "afk", name: "AFK Alert", cat: "Utility", desc: "Flashes the tab title if you go idle.",
+      opts: [["afkMinutes", "Minutes", "range", [1, 30, 1]]] },
+    { id: "titleFlash", name: "Focus Reminder", cat: "Utility", desc: "Flashes the tab title when you tab away." }
   ];
   var CATS = ["All", "HUD", "Visual", "Utility", "Cosmetics", "Settings"];
 

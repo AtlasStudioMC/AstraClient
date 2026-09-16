@@ -8,3 +8,5 @@ AstraClient.html
 node_modules
 __pycache__
 server-plugin/target
+games/
+logo.png

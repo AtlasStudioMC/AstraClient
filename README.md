@@ -4,6 +4,30 @@ Browser Minecraft launcher website with a blue Astra title screen, built-in cape
 
 Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2.
 
+## Legal
+
+This repo ships **original code only** — see `LICENSE`. The actual Minecraft
+game builds (Eaglercraft) are **not committed here** and must be hosted
+separately by whoever deploys this (see "Hosting the game files" below).
+Read `NOTICE.md` for the full disclaimer and a DMCA/takedown contact.
+
+## Hosting the game files
+
+`src/build.py` turns the original offline Eaglercraft HTML files (which you
+must supply yourself — they are not in this repo) into `games/*.bin`. That
+folder is gitignored, so a plain `git push` will NOT deploy them.
+
+Two ways to get them onto Vercel:
+
+1. **Vercel CLI, deployed directly from your machine** (recommended): after
+   running `src/build.py` locally, run `vercel --prod` from the project root.
+   The CLI uploads the local filesystem, `games/` included, regardless of
+   what's tracked in git.
+2. **External storage**: upload `games/*.bin` to Vercel Blob, R2, or similar,
+   and point `src/engine.js`'s fetch URL at that host instead of `games/`.
+
+Either way, the binaries never need to touch the public git history.
+
 ## Deploying on Vercel
 
 1. Import this repo in Vercel (no build command, output is the repo root).

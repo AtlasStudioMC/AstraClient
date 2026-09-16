@@ -12,6 +12,22 @@ Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2.
    - Optional: **Environment Variables → `AUTH_SECRET`**, a long random string (`openssl rand -hex 32`). If you skip it, one is derived from the database token.
 3. Redeploy (env vars only apply to new deployments). Without these the site and games still work, only log in / sign up is disabled.
 
+## Name tag for Astra players (server side)
+
+Astra tells servers its name is `Astra (eagler)` on 1.8.8 and `Astra (vanilla)` on 1.12.2.
+The bundled plugin reads that and puts a tag in front of those players' names - above their
+head and in the tab list - which **everyone** on the server sees, including players on other clients.
+
+1. Build it: `cd server-plugin && mvn package` (produces `target/astratag-1.0.0.jar`).
+2. Drop the jar in your server's `plugins/` folder and restart. Works on Spigot/Paper 1.8 through current.
+3. Edit `plugins/AstraTag/config.yml` to change the tag (`prefix`, default `&b[A] &r`), then `/astratag reload`.
+
+Commands (op only): `/astratag check <player>` shows what client a player reports,
+`/astratag give|take <player>` tags someone by hand, `/astratag reload` re-reads the config.
+Players with the permission `astratag.always` are tagged regardless of client.
+
+Note: on a proxy setup (EaglerXBungee/Velocity) install this on the backend Spigot/Paper server.
+
 ## Project layout
 
 | Path | What it is |
@@ -24,6 +40,7 @@ Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2.
 | `src/astra-overlay.js` | In-game mod menu and HUD mods |
 | `src/make_pack.py` | Generates title-screen textures and capes |
 | `src/build.py` | Builds `index.html`, `games/` and the offline `AstraClient.html` |
+| `server-plugin/` | Spigot plugin that tags Astra players on your server |
 
 ## Rebuilding
 

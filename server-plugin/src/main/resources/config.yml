@@ -1,0 +1,6 @@
+# Text put in front of tagged players' names. & colour codes work.
+# Keep it short: Minecraft 1.8 only allows 16 characters here.
+prefix: "&b[A] &r"
+
+# A player is tagged when the client name they report contains this text.
+brand-contains: "astra"

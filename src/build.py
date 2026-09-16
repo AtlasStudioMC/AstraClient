@@ -35,6 +35,13 @@ REBRAND = {
     "v152": [("eaglercraft 1.5.2-sp2.01 official", "Astra Client 1.5.2"),
              ("Eaglercraft: 1.5.2-sp2.01", "Astra Client: 1.5.2")],
 }
+# Make the client introduce itself to servers as Astra, so a server plugin can tag
+# Astra players. The original name is kept in brackets so anything that checks for it
+# still matches. These strings appear exactly once each in their builds.
+BRAND_PATCHES = {
+    "v18": [('case 0:return C(644);default:', 'case 0:return "Astra (eagler)";default:')],
+    "v112": [('"vanilla"', '"Astra (vanilla)"')],
+}
 TITLES = {"v18": "Astra Client 1.8.8", "v18w": "Astra Client 1.8.8", "v112": "Astra Client 1.12.2", "v152": "Astra Client 1.5.2"}
 
 def rebrand(html, id_):
@@ -46,11 +53,15 @@ def rebrand(html, id_):
         start = at + len(tag)
         end = html.index("<", start)
         code = gzip.decompress(base64.b64decode(html[start:end])).decode("utf-8")
-        for a, b in pairs:
+        for a, b in pairs + BRAND_PATCHES.get(id_, []):
+            if a not in code:
+                print(f"  note: {id_} pattern not found, skipping: {a[:40]}")
             code = code.replace(a, b)
         html = html[:start] + base64.b64encode(gzip.compress(code.encode("utf-8"), 9, mtime=0)).decode() + html[end:]
     else:
-        for a, b in pairs:
+        for a, b in pairs + BRAND_PATCHES.get(id_, []):
+            if a not in html:
+                print(f"  note: {id_} pattern not found, skipping: {a[:40]}")
             html = html.replace(a, b)
     import re as _re
     return _re.sub(r"<title>.*?</title>", "<title>" + TITLES.get(id_, "Astra Client") + "</title>", html, count=1, flags=_re.S)

@@ -7,3 +7,4 @@ AstraClient.html
 .vercel
 node_modules
 __pycache__
+server-plugin/target

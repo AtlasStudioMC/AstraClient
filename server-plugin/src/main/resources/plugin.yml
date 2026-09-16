@@ -1,0 +1,14 @@
+name: AstraTag
+version: 1.0.0
+main: dev.atlasstudiomc.astratag.AstraTag
+api-version: 1.13
+author: Atlas Studio
+description: Shows an [A] tag next to players using the Astra client.
+commands:
+  astratag:
+    description: Manage Astra tags
+    usage: /astratag <reload|check <player>|give <player>|take <player>>
+    permission: astratag.admin
+permissions:
+  astratag.admin:
+    default: op

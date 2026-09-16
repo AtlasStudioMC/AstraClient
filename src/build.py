@@ -105,6 +105,8 @@ for id_, (fn, db) in available.items():
     if "--no-offline" not in sys.argv:
         blocks.append(f'<script type="application/octet-stream" id="{id_}">{base64.b64encode(data).decode()}</script>')
 
+import shutil
+shutil.copyfile(src / "pack/logo.png", root / "logo.png")  # for link previews
 (root / "index.html").write_text(page(list(available), ""), encoding="utf-8")
 print("index.html", round((root / "index.html").stat().st_size / 1e6, 2), "MB")
 if blocks:

@@ -82,6 +82,7 @@ nav.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:1.6
 .navlinks a:hover{color:var(--text)}
 .navlinks a.active{color:#fff;border-bottom-color:var(--accent)}
 .navright{margin-left:auto;display:flex;gap:.45rem;align-items:center}
+.mobile-only-link{display:none}
 .navright .btn{padding:.45rem .85rem;font-size:.88rem}
 #navToggle{display:none}
 .wrap{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
@@ -91,14 +92,16 @@ nav.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:1.6
 .hero::before{content:"";position:absolute;inset:0;background:linear-gradient(95deg,rgba(5,10,20,.96) 0%,rgba(5,10,20,.85) 34%,rgba(5,10,20,.45) 62%,rgba(5,10,20,.25) 100%)}
 .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:120px;background:linear-gradient(180deg,transparent,var(--bg))}
 .hero .wrap{position:relative;min-height:min(72vh,620px);display:flex;flex-direction:column;justify-content:center;padding-block:clamp(3.5rem,9vw,6rem)}
+@media (max-width:640px){.hero .wrap{min-height:0;padding-block:2.6rem 3rem}}
 .lockup{display:flex;align-items:center;gap:clamp(.7rem,1.6vw,1.1rem)}
 .lockup img{width:clamp(56px,8vw,96px);height:clamp(56px,8vw,96px);image-rendering:pixelated}
 .hero h1{font-family:var(--px);font-size:clamp(3rem,9vw,6rem);line-height:.92;color:#fff;letter-spacing:.02em;text-shadow:5px 5px 0 #14508f}
 .hero .tagline{font-size:clamp(1.05rem,1.8vw,1.35rem);color:#dbe7f5;line-height:1.5;max-width:30ch;margin:1.2rem 0 0}
 .hero .row{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.8rem}
 .hero .meta{margin-top:1.3rem;color:#8fa6c4;font-size:.86rem;display:flex;gap:.9rem;flex-wrap:wrap;align-items:center}
-.hero .meta b{color:#cfe2f8;font-weight:700}
-.hero .meta .sep{width:3px;height:3px;background:#44618a}
+.hero .meta span{white-space:nowrap}
+.hero .meta span:not(:last-child)::after{content:"";width:3px;height:3px;background:#44618a;display:inline-block;margin-left:.9rem}
+.hero .meta b{color:#cfe2f8;font-weight:700;margin-right:.3rem}
 /* HUD floating over the artwork, the way it looks in game */
 .hudfloat{position:absolute;right:clamp(28px,7vw,110px);top:56%;transform:translateY(-50%);pointer-events:none;opacity:.96}
 .hudfloat .stack{display:flex;flex-direction:column;gap:6px;font:700 13px/1 var(--ui);color:#fff}
@@ -178,13 +181,20 @@ p.sub{color:var(--muted);max-width:40rem;line-height:1.65;margin-top:.5rem}
 .kbd{font-family:var(--px);font-size:.78em;background:#1b2b44;border:2px solid #2e4a73;padding:.06rem .35rem}
 
 /* faq + cta + footer */
-details.faq{border-top:2px solid #16253d;padding:.95rem 0}
-details.faq:last-of-type{border-bottom:2px solid #16253d}
-details.faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;gap:1rem}
+.faqlist{border:2px solid var(--line);background:var(--panel)}
+details.faq{border-top:2px solid #16253d;padding:0;transition:background .12s}
+details.faq:first-of-type{border-top:0}
+details.faq:hover{background:#101d33}
+details.faq summary{cursor:pointer;font-weight:700;list-style:none;display:flex;align-items:center;gap:.9rem;padding:1rem 1.2rem}
 details.faq summary::-webkit-details-marker{display:none}
-details.faq summary::after{content:"+";font-family:var(--px);color:var(--accent)}
-details[open].faq summary::after{content:"-"}
-details.faq p{color:var(--muted);margin-top:.6rem;line-height:1.65;max-width:46rem}
+details.faq .qmark{flex:none;width:26px;height:26px;display:grid;place-items:center;background:#122741;border:2px solid var(--line);font-family:var(--px);color:var(--accent);font-size:.85rem}
+details.faq summary .qtext{flex:1}
+details.faq summary .toggle{flex:none;width:16px;height:16px;color:var(--accent)}
+details.faq summary .toggle .plus,details.faq summary .toggle .minus{display:none}
+details.faq summary .toggle .plus{display:block}
+details[open].faq summary .toggle .plus{display:none}
+details[open].faq summary .toggle .minus{display:block}
+details.faq p{color:var(--muted);line-height:1.65;max-width:44rem;padding:0 1.2rem 1.1rem 3.9rem}
 .cta{position:relative;background:url(__BG_CTA__) center/cover;border-top:2px solid #16253d}
 .cta::before{content:"";position:absolute;inset:0;background:rgba(7,13,24,.82)}
 .cta .wrap{position:relative;padding-block:clamp(3rem,6vw,4.5rem);display:flex;flex-direction:column;align-items:center;gap:.9rem;text-align:center}
@@ -199,9 +209,12 @@ footer.foot a:hover{color:#fff}
 @media (max-width:760px){
   .navlinks{display:none;position:absolute;top:100%;left:0;right:0;background:#070e1a;border-bottom:2px solid #16253d;box-shadow:0 14px 30px rgba(0,0,0,.5);flex-direction:column;gap:0;padding:.4rem;z-index:40}
   .navlinks.open{display:flex}
-  .navlinks a{padding:.7rem .6rem;border-bottom:0}
+  .navlinks a{padding:.7rem .6rem;border-bottom:0;display:flex;align-items:center;gap:.5rem}
+  .mobile-only-link{display:flex!important;border-top:2px solid #16253d;margin-top:.3rem;padding-top:.9rem!important}
+  .mobile-only-link i[data-ico]{width:16px;height:16px}
   #navToggle{display:inline-flex;margin-left:auto}
   .navright{margin-left:0}
+  #navAccount{display:none}
   .navright .btn span{display:none}
   .vrow{grid-template-columns:1fr;gap:.5rem}
   footer.foot .wrap{grid-template-columns:1fr}
@@ -321,6 +334,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
       <a href="#capes">Capes</a>
       <a href="#mods">Mods</a>
       <a href="#faq">FAQ</a>
+      <a href="#" id="navAccountMobile" class="mobile-only-link"><i data-ico="user"></i><span>Log in</span></a>
     </div>
     <div class="navright">
       <button class="btn" id="navAccount"><i data-ico="user"></i><span>Log in</span></button>
@@ -336,7 +350,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
         <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
         <a class="btn big" href="#versions">Browse versions</a>
       </div>
-      <div class="meta"><b>4</b> versions <span class="sep"></span> <b>8</b> capes <span class="sep"></span> <b>11</b> mods <span class="sep"></span> no install</div>
+      <div class="meta"><span><b>4</b> versions</span><span><b>8</b> capes</span><span><b>11</b> mods</span><span>no install</span></div>
     </div>
     <div class="hudfloat" aria-hidden="true">
       <div class="stack">
@@ -413,13 +427,15 @@ i[data-ico] svg{width:100%;height:100%;display:block}
 
   <div class="wrap">
     <section class="block" id="faq">
-      <div class="sechead"><div><h2 class="title">FAQ</h2></div></div>
-      <details class="faq"><summary>Which version should I pick?</summary><p>1.8.8 is the most stable and what most servers run. 1.8.8 WASM is the same game but faster on recent Chrome and Edge. 1.12.2 has newer blocks and mobs but is still early and buggy. 1.5.2 is the oldest and lightest.</p></details>
-      <details class="faq"><summary>Do I need an account?</summary><p>No. Everything works without one and saves in your browser. An account only carries your settings between devices.</p></details>
-      <details class="faq"><summary>Why no capes on 1.5.2?</summary><p>1.5.2 uses an older profile format with no custom capes, so it gets the mod menu only.</p></details>
-      <details class="faq"><summary>Is there 1.21?</summary><p>Not yet. The 1.21 browser ports we tried freeze before the main menu. It'll be added once one actually works.</p></details>
-      <details class="faq"><summary>Where are my worlds saved?</summary><p>In your browser's storage for this site. Clearing site data deletes them, so back up anything you care about from inside the game.</p></details>
-      <details class="faq" id="credits"><summary>Credits</summary><p>Astra is a launcher and mod layer built on the open-source browser ports of Minecraft by lax1dude, ayunami2000 and contributors. Minecraft is a trademark of Mojang Studios; Astra is not affiliated with Mojang or Microsoft.</p></details>
+      <div class="sechead"><div><h2 class="title">FAQ</h2><p class="sub">Still stuck? Ping us on GitHub.</p></div></div>
+      <div class="faqlist">
+      <details class="faq"><summary><span class="qmark">?</span><span class="qtext">Which version should I pick?</span><span class="toggle"><i data-ico="plus" class="plus"></i><i data-ico="minus" class="minus"></i></span></summary><p>1.8.8 is the most stable and what most servers run. 1.8.8 WASM is the same game but faster on recent Chrome and Edge. 1.12.2 has newer blocks and mobs but is still early and buggy. 1.5.2 is the oldest and lightest.</p></details>
+      <details class="faq"><summary><span class="qmark">?</span><span class="qtext">Do I need an account?</span><span class="toggle"><i data-ico="plus" class="plus"></i><i data-ico="minus" class="minus"></i></span></summary><p>No. Everything works without one and saves in your browser. An account only carries your settings between devices.</p></details>
+      <details class="faq"><summary><span class="qmark">?</span><span class="qtext">Why no capes on 1.5.2?</span><span class="toggle"><i data-ico="plus" class="plus"></i><i data-ico="minus" class="minus"></i></span></summary><p>1.5.2 uses an older profile format with no custom capes, so it gets the mod menu only.</p></details>
+      <details class="faq"><summary><span class="qmark">?</span><span class="qtext">Is there 1.21?</span><span class="toggle"><i data-ico="plus" class="plus"></i><i data-ico="minus" class="minus"></i></span></summary><p>Not yet. The 1.21 browser ports we tried freeze before the main menu. It'll be added once one actually works.</p></details>
+      <details class="faq"><summary><span class="qmark">?</span><span class="qtext">Where are my worlds saved?</span><span class="toggle"><i data-ico="plus" class="plus"></i><i data-ico="minus" class="minus"></i></span></summary><p>In your browser's storage for this site. Clearing site data deletes them, so back up anything you care about from inside the game.</p></details>
+      <details class="faq" id="credits"><summary><span class="qmark">?</span><span class="qtext">Credits</span><span class="toggle"><i data-ico="plus" class="plus"></i><i data-ico="minus" class="minus"></i></span></summary><p>Astra is a launcher and mod layer built on the open-source browser ports of Minecraft by lax1dude, ayunami2000 and contributors. Minecraft is a trademark of Mojang Studios; Astra is not affiliated with Mojang or Microsoft.</p></details>
+      </div>
     </section>
   </div>
 
@@ -698,6 +714,8 @@ const ICONS={
   user:["..####..",".######.",".######.","..####..","........",".######.","########","########"],
   x:["##....##",".##..##.","..####..","...##...","...##...","..####..",".##..##.","##....##"],
   menu:["########","........","########","........","########","........","........","........"],
+  plus:["........","...##...","...##...","..####..","..####..","...##...","...##...","........"],
+  minus:["........","........","........","..####..","..####..","........","........","........"],
   gauge:["..####..",".#....#.","#..##..#","#.##...#","#......#",".#....#.","..####..","........"],
   click:["..#.....","..##....","..###...","..####..","..#####.","..###...",".#..##..","....##.."],
   keys:["########","#.#.#.#.","########","#.#.#.#.","########","........","..####..","........"],
@@ -748,12 +766,14 @@ function renderAccount(){
   const on=!!session.token;
   $("#acctOut").hidden=on;$("#acctIn").hidden=!on;$("#acctName").textContent=session.user;
   const nav=$("#navAccount");nav.hidden=!API;nav.querySelector("span").textContent=on?session.user:"Log in";
+  $("#navAccountMobile").querySelector("span").textContent=on?session.user:"Log in";
   renderChip();
 }
 function openAcct(){if(!API)return;$("#acct").classList.add("open");renderAccount()}
 $("#acctClose").onclick=()=>$("#acct").classList.remove("open");
 $("#acct").onclick=e=>{if(e.target.id==="acct")$("#acct").classList.remove("open")};
 $("#navAccount").onclick=openAcct;$("#chip").onclick=openAcct;
+$("#navAccountMobile").onclick=e=>{e.preventDefault();$("#navlinks").classList.remove("open");openAcct()};
 $$(".mtabs button").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$$(".mtabs button").forEach(x=>x.classList.toggle("on",x===b));$("#aSubmit").textContent=mode==="login"?"Log in":"Create account";$("#aPass").autocomplete=mode==="login"?"current-password":"new-password";$("#aErr").textContent=""});
 $("#acctForm").onsubmit=async e=>{
   e.preventDefault();$("#aErr").textContent="";$("#aSubmit").disabled=true;

@@ -4,6 +4,10 @@ Browser Minecraft launcher website with a blue Astra title screen, built-in cape
 
 Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2.
 
+## Before you deploy
+
+Set `SITE_URL` at the top of `src/build.py` to your real domain, then rebuild (`python3 src/build.py`). It's baked into the canonical URL, Open Graph/Twitter tags, the JSON-LD block, `robots.txt` and `sitemap.xml` - all generated files, so a stale placeholder just means bad SEO, not a broken site.
+
 ## Legal
 
 This repo ships **original code only** — see `LICENSE`. The actual Minecraft

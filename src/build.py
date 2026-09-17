@@ -8,6 +8,9 @@ Needs the original Eaglercraft offline HTML files in the project root (not commi
 """
 import base64, gzip, json, pathlib, sys
 
+# Set this to your real domain before deploying - it drives canonical/OG/sitemap tags.
+SITE_URL = "https://astraclient.app"
+
 root = pathlib.Path(__file__).resolve().parent.parent
 src = root / "src"
 # id -> (file, worlds database name)
@@ -83,6 +86,7 @@ def page(hosted_ids, payloads):
     out = out.replace("__CAPES__", json.dumps(capes))
     out = out.replace("__HOSTED__", json.dumps(hosted_ids))
     out = out.replace("__LOGO__", "data:image/png;base64," + (src / "pack/logo.b64").read_text().strip())
+    out = out.replace("__SITE_URL__", SITE_URL)
     out = out.replace("__ENGINE__", (src / "engine.js").read_text())
     imgs = {"__LAUNCHER_BG__": src / "img/launcher.jpg", "__BG_HERO__": src / "pack/web_hero.jpg",
             "__BG_BAND__": src / "pack/web_band.jpg", "__BG_CTA__": src / "pack/web_cta.jpg"}
@@ -107,6 +111,22 @@ for id_, (fn, db) in available.items():
 
 import shutil
 shutil.copyfile(src / "pack/logo.png", root / "logo.png")  # for link previews
+
+(root / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
+(root / "sitemap.xml").write_text(
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    f'  <url><loc>{SITE_URL}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n'
+    f'  <url><loc>{SITE_URL}/#versions</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
+    f'  <url><loc>{SITE_URL}/#capes</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
+    f'  <url><loc>{SITE_URL}/#mods</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
+    '</urlset>\n'
+)
+(root / "site.webmanifest").write_text(json.dumps({
+    "name": "Astra Client", "short_name": "Astra", "start_url": "/", "display": "standalone",
+    "background_color": "#0a1220", "theme_color": "#0a1220",
+    "icons": [{"src": "/logo.png", "sizes": "256x256", "type": "image/png"}]
+}))
 (root / "index.html").write_text(page(list(available), ""), encoding="utf-8")
 print("index.html", round((root / "index.html").stat().st_size / 1e6, 2), "MB")
 if blocks:

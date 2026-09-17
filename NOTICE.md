@@ -31,7 +31,7 @@ files.
 
 If you are a rights holder and believe something here infringes your
 copyright or trademark, open an issue on this repository or email
-**legal@atlasstudiomc.dev** with:
+**AtlasStudioMC@proton.me** with:
 
 1. The specific file or URL,
 2. A description of the right you hold, and

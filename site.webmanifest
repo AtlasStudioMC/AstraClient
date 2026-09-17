@@ -1,0 +1,1 @@
+{"name": "Astra Client", "short_name": "Astra", "start_url": "/", "display": "standalone", "background_color": "#0a1220", "theme_color": "#0a1220", "icons": [{"src": "/logo.png", "sizes": "256x256", "type": "image/png"}]}

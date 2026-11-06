@@ -336,6 +336,25 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .jsteps code{background:#050c22;padding:.05rem .35rem;border:1px solid #fff2}
 @media (max-width:820px){.join{grid-template-columns:1fr}}
 </style>
+<script>window.LADUE_SITE_VERSION="dev";
+/* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
+   cached copy checks version.json (always fetched fresh) and reloads itself when the site changes. */
+(function(){
+  var KEY="ladue.updateTried";
+  async function check(){
+    if(document.getElementById("app")&&document.getElementById("app").classList.contains("open"))return; // never interrupt the launcher
+    try{
+      var r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;
+      var v=(await r.json()).v;if(!v||v===window.LADUE_SITE_VERSION)return;
+      if(sessionStorage.getItem(KEY)===v)return; // already tried this version once; don't loop
+      sessionStorage.setItem(KEY,v);
+      await fetch(location.pathname,{cache:"reload"}); // replace the browser's stale copy
+      location.reload();
+    }catch(e){}
+  }
+  check();setInterval(check,5*60*1000);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)check()});
+})();</script>
 </head>
 <body>
 

@@ -79,3 +79,7 @@ python3 src/make_pack.py && python3 src/build.py
 ## Credits
 
 Astra is a launcher and mod layer built on the open-source browser ports of Minecraft by lax1dude, ayunami2000 and contributors. Minecraft is a trademark of Mojang Studios; Astra is not affiliated with Mojang or Microsoft.
+
+## Updating the live site
+
+Run `node src/stamp.js` before every push. Open pages check `version.json` and reload themselves when the version changes, so players never need to clear their browser data.

@@ -1,6 +1,6 @@
 # Ladue Client
 
-Live at https://ladue.js.org
+Live at https://ladue.cc.cd
 
 Browser Minecraft launcher website with a blue Ladue title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
 

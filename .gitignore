@@ -14,3 +14,4 @@ games/
 !games/
 games/*
 !games/v262.bin
+!games/ladue-pack.json

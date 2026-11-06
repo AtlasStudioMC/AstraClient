@@ -416,9 +416,9 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
           </div>
           <div class="jcard">
             <h3>Ladue resource pack</h3>
-            <p class="sub" style="margin:0 0 1rem">A Ladue blue title screen with the LHWHS crest and Ladue splash texts, made for 26.2.</p>
+            <p class="sub" style="margin:0 0 1rem">Built into Ladue 26.2 and turned on automatically: a Ladue blue title screen with the LHWHS crest and Ladue splash texts. Download it for Java Edition.</p>
             <a class="btn primary" href="ladue-resource-pack.zip" download><i data-ico="save"></i>Download pack</a>
-            <p class="sub" style="margin-top:.9rem;font-size:.85rem">In game: Options, Resource Packs, Import Pack, pick the zip, move it to Selected, Done. Java Edition: put the zip in your resourcepacks folder.</p>
+            <p class="sub" style="margin-top:.9rem;font-size:.85rem">Java Edition: put the zip in your resourcepacks folder. In Ladue 26.2 you can switch it off under Options, Resource Packs.</p>
           </div>
         </div>
       </div>
@@ -752,6 +752,7 @@ $("#playBtn").onclick=async()=>{
   try{
     if(v.theme&&sets.theme&&GAMES[v.id])try{await installPack(v.id)}catch(e){console.warn("Astra: pack install failed",e)}
     if(v.cos)await applyCosmetics(v.id,cos);
+    if(v.id==="v262")try{await installLaduePack()}catch(e){console.warn("Ladue: pack install failed",e)}
     status.textContent="Loading "+v.name+"...";
     const html=await unpack(v.id,p=>status.textContent="Downloading "+v.name+"... "+p+"%");
     // replace this page with the game so it runs top-level (gamepad, storage, pointer lock work)

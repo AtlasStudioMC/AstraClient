@@ -164,3 +164,34 @@ async function applyCosmetics(v,cos){
     localStorage.setItem(key,btoa(bin));
   }catch(e){console.warn('Astra: could not apply cosmetics',e)}
 }
+// ---- Ladue resource pack, built in for 26.2 ----
+// Writes the pack into the game's own file store and turns it on, once per browser, so a
+// player who later switches it off in Options keeps it off.
+const LADUE_PACK='ladue';
+const LADUE_DB='_net_lax1dude_eaglercraft_v1_8_internal_PlatformFilesystem_1_8_8_ladue_worlds_26_2';
+async function installLaduePack(){
+  const db=await new Promise((ok,no)=>{const r=indexedDB.open(LADUE_DB,1);
+    r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('filesystem'))r.result.createObjectStore('filesystem',{keyPath:['path']})};
+    r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
+  const files=await (await fetch('games/ladue-pack.json?v=86dbff1e8d',{cache:'no-cache'})).json();
+  await new Promise((ok,no)=>{const tx=db.transaction('filesystem','readwrite'),st=tx.objectStore('filesystem');
+    const put=(path,bytes)=>st.put({path,data:bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
+    put('resourcepacks/.eaglerfsdir',new Uint8Array(0));
+    put('resourcepacks/'+LADUE_PACK+'/.eaglerfsdir',new Uint8Array(0));
+    for(const [name,b64] of Object.entries(files))put('resourcepacks/'+LADUE_PACK+'/'+name,Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));
+    tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});
+  db.close();
+  if(localStorage.getItem('ladue.pack.enabled'))return; // only switch it on the first time
+  const KEY='_eaglercraftX.g',entry='"file/'+LADUE_PACK+'"';
+  let txt='version:4903\n';
+  const cur=localStorage.getItem(KEY);
+  if(cur)txt=await new Response(new Blob([Uint8Array.from(atob(cur),c=>c.charCodeAt(0))]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+  const lines=txt.split('\n');const i=lines.findIndex(l=>l.startsWith('resourcePacks:'));
+  if(i<0)lines.splice(1,0,'resourcePacks:["vanilla",'+entry+']');
+  else if(!lines[i].includes(entry))lines[i]=lines[i].replace(/\]\s*$/,(lines[i].includes('[]')?'':',')+entry+']');
+  const gz=new Uint8Array(await new Response(new Blob([lines.join('\n')]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer());
+  let bin='';for(const x of gz)bin+=String.fromCharCode(x);
+  localStorage.setItem(KEY,btoa(bin));
+  localStorage.setItem('ladue.pack.enabled','1');
+}
+

@@ -1,4 +1,4 @@
-/* Astra Client in-game overlay: mod menu (Right Shift), HUD mods with drag-to-move, cosmetics */
+/* Ladue Client in-game overlay: mod menu (Right Shift), HUD mods with drag-to-move, cosmetics */
 (function () {
   "use strict";
   var MODS_KEY = "astra.mods", COS_KEY = "astra.cosmetics";
@@ -185,7 +185,7 @@
   }, 2000);
   if (typeof document.hidden !== "undefined") {
     document.addEventListener("visibilitychange", function () {
-      if (cfg.titleFlash && document.hidden) startFlash("Come back to Astra!");
+      if (cfg.titleFlash && document.hidden) startFlash("Come back to Ladue!");
       else if (!cfg.afk || Date.now() - lastActivity <= cfg.afkMinutes * 60000) stopFlash();
     });
   }
@@ -299,7 +299,7 @@
 
   function drawCosmetics() {
     var capes = window.ASTRA_CAPES || [];
-    body.appendChild(el("div", "ax-note", "Pick a cape here or in the Astra launcher. It's put on your player the next time you launch the game from Astra."));
+    body.appendChild(el("div", "ax-note", "Pick a cape here or in the Ladue launcher. It's put on your player the next time you launch the game from Ladue."));
     [{ id: "", name: "None" }].concat(capes).forEach(function (c) {
       var b = el("button", "ax-cape" + ((cos.cape || "") === c.id ? " on" : ""));
       var cv = el("canvas"); cv.width = 10; cv.height = 16;

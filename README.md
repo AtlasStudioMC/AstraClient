@@ -1,12 +1,10 @@
-# Astra Client
+# Ladue Client
 
-Browser Minecraft launcher website with a blue Astra title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
+Live at https://ladue.js.org
 
-Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2.
+Browser Minecraft launcher website with a blue Ladue title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
 
-## Before you deploy
-
-Set `SITE_URL` at the top of `src/build.py` to your real domain, then rebuild (`python3 src/build.py`). It's baked into the canonical URL, Open Graph/Twitter tags, the JSON-LD block, `robots.txt` and `sitemap.xml` - all generated files, so a stale placeholder just means bad SEO, not a broken site.
+Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2 in the browser, plus 26.2 (Java Edition) on the Ladue server.
 
 ## Legal
 

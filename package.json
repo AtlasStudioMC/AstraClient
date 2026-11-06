@@ -1,6 +1,8 @@
 {
-  "name": "astra-client",
+  "name": "ladue-client",
   "private": true,
-  "description": "Astra Client - browser Minecraft launcher with capes, mods and accounts",
-  "engines": { "node": ">=18" }
+  "description": "Ladue Client - browser Minecraft launcher with capes, mods and accounts",
+  "engines": {
+    "node": ">=18"
+  }
 }

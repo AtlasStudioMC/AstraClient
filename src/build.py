@@ -1,15 +1,13 @@
-"""Build Astra Client.
+"""Build Ladue Client.
 
 Outputs:
   index.html + games/*.bin   hosted site for Vercel (games download on demand)
-  AstraClient.html           offline single-file version (games embedded, not committed)
+  LadueClient.html           offline single-file version (games embedded, not committed)
 
 Needs the original Eaglercraft offline HTML files in the project root (not committed).
 """
 import base64, gzip, json, pathlib, sys
 
-# Set this to your real domain before deploying - it drives canonical/OG/sitemap tags.
-SITE_URL = "https://astraclient.app"
 
 root = pathlib.Path(__file__).resolve().parent.parent
 src = root / "src"
@@ -27,16 +25,16 @@ overlay = ("window.ASTRA_CAPES=" + json.dumps([{"id": c["id"], "name": c["name"]
 
 # swap the upstream client branding for Astra in the strings the game shows on screen
 REBRAND = {
-    "v18": [("EaglercraftX 1.8-u53 ultimate [", "Astra Client 1.8.8 ["),
-            ("EaglercraftX 1.8-u53 - ", "Astra Client 1.8.8 - "),
-            ("EaglercraftX 1.8 u53", "Astra Client 1.8.8"),
-            ("EaglercraftX u53", "Astra Client")],
-    "v18w": [("EaglercraftX 1.8-u53 ultimate [", "Astra Client 1.8.8 ["),
-             ("EaglercraftX 1.8-u53 - ", "Astra Client 1.8.8 - ")],
-    "v112": [("Eaglercraft 1.12.2 (u3)", "Astra Client 1.12.2"),
-             ("Eaglercraft 1.12.2 1.12.2-u3 - ", "Astra Client 1.12.2 - ")],
-    "v152": [("eaglercraft 1.5.2-sp2.01 official", "Astra Client 1.5.2"),
-             ("Eaglercraft: 1.5.2-sp2.01", "Astra Client: 1.5.2")],
+    "v18": [("EaglercraftX 1.8-u53 ultimate [", "Ladue Client 1.8.8 ["),
+            ("EaglercraftX 1.8-u53 - ", "Ladue Client 1.8.8 - "),
+            ("EaglercraftX 1.8 u53", "Ladue Client 1.8.8"),
+            ("EaglercraftX u53", "Ladue Client")],
+    "v18w": [("EaglercraftX 1.8-u53 ultimate [", "Ladue Client 1.8.8 ["),
+             ("EaglercraftX 1.8-u53 - ", "Ladue Client 1.8.8 - ")],
+    "v112": [("Eaglercraft 1.12.2 (u3)", "Ladue Client 1.12.2"),
+             ("Eaglercraft 1.12.2 1.12.2-u3 - ", "Ladue Client 1.12.2 - ")],
+    "v152": [("eaglercraft 1.5.2-sp2.01 official", "Ladue Client 1.5.2"),
+             ("Eaglercraft: 1.5.2-sp2.01", "Ladue Client: 1.5.2")],
 }
 # Make the client introduce itself to servers as Astra, so a server plugin can tag
 # Astra players. The original name is kept in brackets so anything that checks for it
@@ -45,7 +43,7 @@ BRAND_PATCHES = {
     "v18": [('case 0:return C(644);default:', 'case 0:return "Astra (eagler)";default:')],
     "v112": [('"vanilla"', '"Astra (vanilla)"')],
 }
-TITLES = {"v18": "Astra Client 1.8.8", "v18w": "Astra Client 1.8.8", "v112": "Astra Client 1.12.2", "v152": "Astra Client 1.5.2"}
+TITLES = {"v18": "Ladue Client 1.8.8", "v18w": "Ladue Client 1.8.8", "v112": "Ladue Client 1.12.2", "v152": "Ladue Client 1.5.2"}
 
 def rebrand(html, id_):
     pairs = REBRAND.get(id_, [])
@@ -67,7 +65,7 @@ def rebrand(html, id_):
                 print(f"  note: {id_} pattern not found, skipping: {a[:40]}")
             html = html.replace(a, b)
     import re as _re
-    return _re.sub(r"<title>.*?</title>", "<title>" + TITLES.get(id_, "Astra Client") + "</title>", html, count=1, flags=_re.S)
+    return _re.sub(r"<title>.*?</title>", "<title>" + TITLES.get(id_, "Ladue Client") + "</title>", html, count=1, flags=_re.S)
 
 def game_bytes(fn, db, id_):
     html = (root / fn).read_text(encoding="utf-8")
@@ -86,7 +84,6 @@ def page(hosted_ids, payloads):
     out = out.replace("__CAPES__", json.dumps(capes))
     out = out.replace("__HOSTED__", json.dumps(hosted_ids))
     out = out.replace("__LOGO__", "data:image/png;base64," + (src / "pack/logo.b64").read_text().strip())
-    out = out.replace("__SITE_URL__", SITE_URL)
     out = out.replace("__ENGINE__", (src / "engine.js").read_text())
     imgs = {"__LAUNCHER_BG__": src / "img/launcher.jpg", "__BG_HERO__": src / "pack/web_hero.jpg",
             "__BG_BAND__": src / "pack/web_band.jpg", "__BG_CTA__": src / "pack/web_cta.jpg"}
@@ -112,24 +109,9 @@ for id_, (fn, db) in available.items():
 import shutil
 shutil.copyfile(src / "pack/logo.png", root / "logo.png")  # for link previews
 
-(root / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {SITE_URL}/sitemap.xml\n")
-(root / "sitemap.xml").write_text(
-    '<?xml version="1.0" encoding="UTF-8"?>\n'
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-    f'  <url><loc>{SITE_URL}/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>\n'
-    f'  <url><loc>{SITE_URL}/#versions</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
-    f'  <url><loc>{SITE_URL}/#capes</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
-    f'  <url><loc>{SITE_URL}/#mods</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>\n'
-    '</urlset>\n'
-)
-(root / "site.webmanifest").write_text(json.dumps({
-    "name": "Astra Client", "short_name": "Astra", "start_url": "/", "display": "standalone",
-    "background_color": "#0a1220", "theme_color": "#0a1220",
-    "icons": [{"src": "/logo.png", "sizes": "256x256", "type": "image/png"}]
-}))
 (root / "index.html").write_text(page(list(available), ""), encoding="utf-8")
 print("index.html", round((root / "index.html").stat().st_size / 1e6, 2), "MB")
 if blocks:
     offline = page([], "\n".join(blocks))
-    (root / "AstraClient.html").write_text(offline, encoding="utf-8")
-    print("AstraClient.html", round(len(offline) / 1e6, 1), "MB")
+    (root / "LadueClient.html").write_text(offline, encoding="utf-8")
+    print("LadueClient.html", round(len(offline) / 1e6, 1), "MB")

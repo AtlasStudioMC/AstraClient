@@ -18,13 +18,13 @@ Those game builds:
 
 - are **not committed to this repository** (see `.gitignore` — `games/` and
   the raw `Eaglercraft*.html` files are excluded),
-- are not written or owned by Atlas Studio,
+- are not written or owned by the Ladue Client team,
 - are downloaded/served separately from wherever the site operator hosts
   them, and
 - remain subject to whatever terms lax1dude/ayunami2000 and Mojang Studios
   apply to them, not to this repo's MIT license.
 
-Anyone deploying Astra is responsible for how they obtain and host those game
+Anyone deploying Ladue Client is responsible for how they obtain and host those game
 files.
 
 ## Takedown / DMCA contact

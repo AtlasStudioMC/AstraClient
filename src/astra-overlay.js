@@ -9,6 +9,7 @@
     afk: false, afkMinutes: 5, titleFlash: false,
     ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
     breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
+    voice: false, voiceMode: "ptt", voiceKey: "KeyV", voiceVolume: 100,
     hudColor: "#ffffff", hudBg: 60, hudScale: 100
   };
   var cfg = load(MODS_KEY, DEFAULTS), hudHidden = false;
@@ -71,13 +72,13 @@
 
   /* ---------------- HUD elements ---------------- */
   var DEFAULT_POS = { fps: [8, 8], cps: [8, 34], clock: [8, 60], session: [8, 86], memory: [8, 112], battery: [8, 138], keystrokes: [8, 170],
-    ping: [8, 270], players: [8, 296], date: [8, 322], stopwatch: [8, 348], customText: [8, 374] };
+    ping: [8, 270], players: [8, 296], date: [8, 322], stopwatch: [8, 348], customText: [8, 374], voice: [8, 400] };
   var hud = {};
   function hudEl(id, inner) {
     var d = el("div", "ah"); d.dataset.id = id; d.appendChild(inner); ROOT.appendChild(d); hud[id] = d; return d;
   }
   var pills = {};
-  ["fps", "cps", "clock", "session", "memory", "battery", "ping", "players", "date", "stopwatch", "customText"].forEach(function (id) { pills[id] = el("div", "pill"); hudEl(id, pills[id]); });
+  ["fps", "cps", "clock", "session", "memory", "battery", "ping", "players", "date", "stopwatch", "customText", "voice"].forEach(function (id) { pills[id] = el("div", "pill"); hudEl(id, pills[id]); });
 
   var ks = el("div", "ks"), keyMap = {};
   function key(label, code, cls) { var d = el("div", cls || "", label); if (code) keyMap[code] = d; ks.appendChild(d); return d; }
@@ -225,6 +226,97 @@
   }
 
 
+  /* ---------------- voice chat ----------------
+     One Ladue voice channel for everyone on the site. wss://ladue.cc.cd/voice only introduces
+     players and passes WebRTC setup messages; audio goes straight between browsers. */
+  var V = { ws: null, mic: null, peers: {}, names: {}, talking: {}, me: 0, held: false, status: "Voice off" };
+  var ICE = [{ urls: "stun:stun.cloudflare.com:3478" }, { urls: "stun:stun.l.google.com:19302" }];
+  function voiceName() {
+    try { var u = localStorage.getItem("_eaglercraftX.username"); if (u) return atob(u); } catch (e) {}
+    return cos.username || "Player";
+  }
+  function voiceHud() {
+    if (!cfg.voice) return;
+    var n = Object.keys(V.peers).length, who = Object.keys(V.talking).filter(function (id) { return V.talking[id]; }).map(function (id) { return V.names[id] || "?"; });
+    var me = micLive() ? "\uD83C\uDF99 " : "";
+    pills.voice.textContent = V.ws ? me + "Voice " + (n + 1) + " in channel" + (who.length ? " | " + who.join(", ") : "") : V.status;
+  }
+  function micLive() { return !!(V.mic && V.mic.getAudioTracks()[0] && V.mic.getAudioTracks()[0].enabled); }
+  function setMic(on) {
+    if (!V.mic) return;
+    var was = micLive();
+    V.mic.getAudioTracks().forEach(function (t) { t.enabled = on; });
+    if (was !== on && V.ws && V.ws.readyState === 1) V.ws.send(JSON.stringify({ t: "talk", on: on }));
+    voiceHud();
+  }
+  function peerConn(id, initiator) {
+    var pc = new RTCPeerConnection({ iceServers: ICE });
+    var audio = new Audio(); audio.autoplay = true; audio.volume = cfg.voiceVolume / 100;
+    V.peers[id] = { pc: pc, audio: audio };
+    V.mic.getTracks().forEach(function (t) { pc.addTrack(t, V.mic); });
+    pc.ontrack = function (e) { audio.srcObject = e.streams[0]; audio.play().catch(function () {}); };
+    pc.onicecandidate = function (e) { if (e.candidate) signal(id, { ice: e.candidate }); };
+    pc.onconnectionstatechange = function () { if (pc.connectionState === "failed") dropPeer(id); };
+    if (initiator) pc.createOffer().then(function (o) { return pc.setLocalDescription(o); }).then(function () { signal(id, { sdp: pc.localDescription }); });
+    return V.peers[id];
+  }
+  function dropPeer(id) {
+    var p = V.peers[id]; if (!p) return;
+    try { p.pc.close(); } catch (e) {} p.audio.srcObject = null;
+    delete V.peers[id]; delete V.talking[id]; voiceHud();
+  }
+  function signal(to, data) { if (V.ws && V.ws.readyState === 1) V.ws.send(JSON.stringify({ t: "signal", to: to, data: data })); }
+  function onSignal(from, d) {
+    var p = V.peers[from] || peerConn(from, false), pc = p.pc;
+    if (d.sdp) {
+      pc.setRemoteDescription(d.sdp).then(function () {
+        if (d.sdp.type === "offer") return pc.createAnswer().then(function (a) { return pc.setLocalDescription(a); }).then(function () { signal(from, { sdp: pc.localDescription }); });
+      }).catch(function (e) { console.warn("Ladue voice:", e); });
+    } else if (d.ice) pc.addIceCandidate(d.ice).catch(function () {});
+  }
+  function voiceStart() {
+    if (V.ws || V.starting) return;
+    V.starting = true; V.status = "Voice: allow the microphone"; voiceHud();
+    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
+      V.starting = false;
+      if (!cfg.voice) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
+      V.mic = stream; setMic(cfg.voiceMode === "open");
+      var ws = V.ws = new WebSocket("wss://ladue.cc.cd/voice?name=" + encodeURIComponent(voiceName()));
+      ws.onmessage = function (e) {
+        var m; try { m = JSON.parse(e.data); } catch (x) { return; }
+        if (m.t === "welcome") { V.me = m.id; m.peers.forEach(function (p) { V.names[p.id] = p.name; peerConn(p.id, true); }); }
+        else if (m.t === "join") V.names[m.id] = m.name;
+        else if (m.t === "leave") dropPeer(m.id);
+        else if (m.t === "signal") onSignal(m.from, m.data);
+        else if (m.t === "talk") V.talking[m.id] = m.on;
+        else if (m.t === "full") V.status = "Voice channel is full";
+        voiceHud();
+      };
+      ws.onclose = function () { if (V.ws === ws) { Object.keys(V.peers).forEach(dropPeer); V.ws = null; V.status = cfg.voice ? "Voice disconnected, retrying" : "Voice off"; voiceHud(); if (cfg.voice) setTimeout(voiceStart, 4000); } };
+      voiceHud();
+    }).catch(function () { V.starting = false; V.status = "Voice: microphone blocked"; voiceHud(); });
+  }
+  function voiceStop() {
+    var ws = V.ws; V.ws = null; if (ws) try { ws.close(); } catch (e) {}
+    Object.keys(V.peers).forEach(dropPeer);
+    if (V.mic) V.mic.getTracks().forEach(function (t) { t.stop(); }); V.mic = null; V.status = "Voice off";
+  }
+  function voiceSync() {
+    if (cfg.voice) voiceStart(); else voiceStop();
+    Object.keys(V.peers).forEach(function (id) { V.peers[id].audio.volume = cfg.voiceVolume / 100; });
+    if (V.mic && !V.held) setMic(cfg.voiceMode === "open");
+    voiceHud();
+  }
+  addEventListener("keydown", function (e) {
+    if (!cfg.voice || cfg.voiceMode !== "ptt" || e.code !== cfg.voiceKey || e.repeat) return;
+    if (menu.classList.contains("open")) return;
+    V.held = true; setMic(true);
+  }, true);
+  addEventListener("keyup", function (e) { if (e.code === cfg.voiceKey && V.held) { V.held = false; if (cfg.voiceMode === "ptt") setMic(false); } }, true);
+  addEventListener("blur", function () { if (V.held) { V.held = false; if (cfg.voiceMode === "ptt") setMic(false); } });
+  setInterval(voiceSync, 2000);
+  pills.voice.textContent = "Voice off";
+
   /* ---------------- mod menu ---------------- */
   var MODS = [
     { id: "fps", name: "FPS Counter", cat: "HUD", desc: "Frames per second." },
@@ -253,7 +345,9 @@
       opts: [["customTextValue", "Text", "text"]] },
     { id: "breakReminder", name: "Break Reminder", cat: "Utility", desc: "Reminds you to take a break every few minutes.",
       opts: [["breakMinutes", "Minutes", "range", [10, 90, 5]]] },
-    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." }
+    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." },
+    { id: "voice", name: "Voice Chat", cat: "Utility", desc: "Talk with everyone on Ladue Client. Hold V to talk, or use open mic. Your browser asks for the microphone.",
+      opts: [["voiceMode", "Mode", "select", [["ptt", "Push to talk"], ["open", "Open mic"]]], ["voiceKey", "Talk key", "select", [["KeyV", "V"], ["KeyB", "B"], ["KeyG", "G"], ["CapsLock", "Caps Lock"], ["AltLeft", "Left Alt"]]], ["voiceVolume", "Volume", "range", [0, 100, 5]]] }
   ];
   var CATS = ["All", "HUD", "Visual", "Utility", "Cosmetics", "Settings"];
 

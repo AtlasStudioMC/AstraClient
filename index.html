@@ -336,7 +336,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .jsteps code{background:#050c22;padding:.05rem .35rem;border:1px solid #fff2}
 @media (max-width:820px){.join{grid-template-columns:1fr}}
 </style>
-<script>window.LADUE_SITE_VERSION="mw5k7fxe";
+<script>window.LADUE_SITE_VERSION="mw5kjis9";
 /* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
    cached copy checks version.json (always fetched fresh) and reloads itself when the site changes. */
 (function(){
@@ -386,7 +386,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
         <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
         <a class="btn big" href="#versions">Browse versions</a>
       </div>
-      <div class="meta"><span><b>26.2</b> ready</span><span><b>9</b> capes</span><span><b>20</b> mods</span><span>no install</span></div>
+      <div class="meta"><span><b>26.2</b> ready</span><span><b>9</b> capes</span><span><b>21</b> mods</span><span>no install</span></div>
     </div>
     <div class="hudfloat" aria-hidden="true">
       <div class="stack">
@@ -651,7 +651,7 @@ async function unpack(id,onProgress){
     })()}});
   }else{
     // hosted build: download the gzipped game file
-    const res=await fetch('games/'+id+'.bin?v=020b9c8ffb',{cache:'no-cache'});
+    const res=await fetch('games/'+id+'.bin?v=76e60b0f68',{cache:'no-cache'});
     if(!res.ok)throw new Error('could not download game ('+res.status+')');
     const total=+res.headers.get('content-length')||0;let got=0;
     const reader=res.body.getReader();
@@ -944,7 +944,7 @@ uname.oninput=()=>{
 };
 
 /* ---------- mods page ---------- */
-const MODS=[["fps","FPS Counter","Frames per second","gauge"],["cps","CPS Counter","Left and right clicks per second","click"],["keystrokes","Keystrokes","WASD, mouse and space","keys"],["clock","Clock","Your local time","clock"],["session","Session Timer","How long you've played","clock"],["memory","Memory Usage","Browser memory used","gauge"],["battery","Battery","Laptop battery level","battery"],["crosshair","Custom Crosshair","Extra crosshair on top","cross"],["zoom","Zoom","Hold C to zoom in","eye"],["filter","Color Filter","Brighter, more vivid colors","brush"],["fullscreenKey","F11 Fullscreen","Toggle fullscreen with F11","expand"],["ping","Ping","Round trip to the Ladue server","gauge"],["players","Ladue Players","Who is on the Ladue server","user"],["date","Date","Today's date","clock"],["stopwatch","Stopwatch","Start or pause with J","clock"],["customText","Custom Text","Your own label on screen","brush"],["breakReminder","Break Reminder","Reminds you to take a break","clock"],["hideHudKey","Hide HUD (F4)","Hide every overlay at once","eye"],["afk","AFK Alert","Flashes the tab if you go idle","clock"],["titleFlash","Focus Reminder","Flashes the tab when you tab away","eye"]];
+const MODS=[["fps","FPS Counter","Frames per second","gauge"],["cps","CPS Counter","Left and right clicks per second","click"],["keystrokes","Keystrokes","WASD, mouse and space","keys"],["clock","Clock","Your local time","clock"],["session","Session Timer","How long you've played","clock"],["memory","Memory Usage","Browser memory used","gauge"],["battery","Battery","Laptop battery level","battery"],["crosshair","Custom Crosshair","Extra crosshair on top","cross"],["zoom","Zoom","Hold C to zoom in","eye"],["filter","Color Filter","Brighter, more vivid colors","brush"],["fullscreenKey","F11 Fullscreen","Toggle fullscreen with F11","expand"],["ping","Ping","Round trip to the Ladue server","gauge"],["players","Ladue Players","Who is on the Ladue server","user"],["date","Date","Today's date","clock"],["stopwatch","Stopwatch","Start or pause with J","clock"],["customText","Custom Text","Your own label on screen","brush"],["breakReminder","Break Reminder","Reminds you to take a break","clock"],["hideHudKey","Hide HUD (F4)","Hide every overlay at once","eye"],["afk","AFK Alert","Flashes the tab if you go idle","clock"],["titleFlash","Focus Reminder","Flashes the tab when you tab away","eye"],["voice","Voice Chat","Talk with everyone, hold V","user"]];
 function renderMods(){
   $("#modOpts").innerHTML=MODS.map(([k,n,d])=>`<button class="opt" data-m="${k}"><div><b>${n}</b><small>${d}</small></div><span class="switch ${mods[k]?"on":""}"></span></button>`).join("");
   $$("#modOpts .opt").forEach(b=>b.onclick=()=>{mods[b.dataset.m]=!mods[b.dataset.m];save("astra.mods",mods);renderMods()});

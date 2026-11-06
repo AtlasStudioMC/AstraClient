@@ -7,9 +7,11 @@
     crosshair: false, crosshairStyle: "plus", zoom: true, zoomKey: "KeyC", zoomLevel: 3,
     filter: false, brightness: 110, saturation: 115, fullscreenKey: true,
     afk: false, afkMinutes: 5, titleFlash: false,
-    hudColor: "#4fb3ff", hudBg: 60, hudScale: 100
+    ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
+    breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
+    hudColor: "#ffffff", hudBg: 60, hudScale: 100
   };
-  var cfg = load(MODS_KEY, DEFAULTS);
+  var cfg = load(MODS_KEY, DEFAULTS), hudHidden = false;
   var cos = load(COS_KEY, { cape: "astra", username: "" });
   function load(k, d) { try { return Object.assign({}, d, JSON.parse(localStorage.getItem(k) || "{}")); } catch (e) { return Object.assign({}, d); } }
   function save() { try { localStorage.setItem(MODS_KEY, JSON.stringify(cfg)); } catch (e) {} }
@@ -17,7 +19,7 @@
   var ROOT = document.documentElement;
   var css = document.createElement("style");
   css.textContent = [
-    ":root{--ac:#4fb3ff}",
+    ":root{--ac:#ffffff}",
     ".ah{position:fixed;z-index:99990;pointer-events:none;font:700 12px/1 'Inter',system-ui,sans-serif;color:#fff;transform-origin:top left;user-select:none}",
     ".ah .pill{background:rgba(5,11,24,var(--hb));border-left:2px solid var(--ac);padding:5px 8px;white-space:nowrap}",
     ".ah.editing{pointer-events:auto;cursor:move;outline:1px dashed var(--ac);outline-offset:2px}",
@@ -68,13 +70,14 @@
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 
   /* ---------------- HUD elements ---------------- */
-  var DEFAULT_POS = { fps: [8, 8], cps: [8, 34], clock: [8, 60], session: [8, 86], memory: [8, 112], battery: [8, 138], keystrokes: [8, 170] };
+  var DEFAULT_POS = { fps: [8, 8], cps: [8, 34], clock: [8, 60], session: [8, 86], memory: [8, 112], battery: [8, 138], keystrokes: [8, 170],
+    ping: [8, 270], players: [8, 296], date: [8, 322], stopwatch: [8, 348], customText: [8, 374] };
   var hud = {};
   function hudEl(id, inner) {
     var d = el("div", "ah"); d.dataset.id = id; d.appendChild(inner); ROOT.appendChild(d); hud[id] = d; return d;
   }
   var pills = {};
-  ["fps", "cps", "clock", "session", "memory", "battery"].forEach(function (id) { pills[id] = el("div", "pill"); hudEl(id, pills[id]); });
+  ["fps", "cps", "clock", "session", "memory", "battery", "ping", "players", "date", "stopwatch", "customText"].forEach(function (id) { pills[id] = el("div", "pill"); hudEl(id, pills[id]); });
 
   var ks = el("div", "ks"), keyMap = {};
   function key(label, code, cls) { var d = el("div", cls || "", label); if (code) keyMap[code] = d; ks.appendChild(d); return d; }
@@ -95,13 +98,13 @@
     ROOT.style.setProperty("--hb", (cfg.hudBg / 100).toFixed(2));
     Object.keys(hud).forEach(function (id) {
       var d = hud[id], p = pos(id);
-      d.style.display = cfg[id] ? "block" : "none";
+      d.style.display = cfg[id] && !hudHidden ? "block" : "none";
       d.style.left = Math.min(p[0], innerWidth - 20) + "px";
       d.style.top = Math.min(p[1], innerHeight - 20) + "px";
       d.style.transform = "scale(" + cfg.hudScale / 100 + ")";
     });
     var c = cfg.hudColor, s = cfg.crosshairStyle;
-    cross.style.display = cfg.crosshair ? "block" : "none";
+    cross.style.display = cfg.crosshair && !hudHidden ? "block" : "none";
     cross.innerHTML = s === "dot" ? '<div style="width:4px;height:4px;background:' + c + '"></div>'
       : s === "circle" ? '<div style="width:10px;height:10px;border:2px solid ' + c + ';border-radius:50%"></div>'
       : '<svg width="14" height="14" viewBox="0 0 14 14" shape-rendering="crispEdges"><rect x="6" y="0" width="2" height="14" fill="' + c + '"/><rect x="0" y="6" width="14" height="2" fill="' + c + '"/></svg>';
@@ -109,6 +112,7 @@
   }
 
   /* ---------------- live values ---------------- */
+  var swRunning = false, swStart = 0, swAcc = 0;
   var frames = 0, last = performance.now(), clicksL = [], clicksR = [], started = Date.now();
   (function loop(now) {
     frames++;
@@ -122,8 +126,28 @@
     pills.session.textContent = "Session " + Math.floor(s / 3600) + ":" + ("0" + Math.floor(s / 60) % 60).slice(-2) + ":" + ("0" + s % 60).slice(-2);
     if (performance.memory) pills.memory.textContent = "RAM " + Math.round(performance.memory.usedJSHeapSize / 1048576) + " MB";
     else pills.memory.textContent = "RAM n/a";
+    pills.date.textContent = new Date().toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+    var sw = swRunning ? swAcc + (t - swStart) : swAcc, ss = Math.floor(sw / 100);
+    pills.stopwatch.textContent = (swRunning ? "\u25B6 " : "\u23F8 ") + Math.floor(ss / 600) + ":" + ("0" + Math.floor(ss / 10) % 60).slice(-2) + "." + ss % 10;
+    pills.customText.textContent = cfg.customTextValue || "Ladue";
     requestAnimationFrame(loop);
   })(performance.now());
+  /* ping: round trip to the Ladue relay; players: who is on the Ladue server */
+  pills.ping.textContent = "Ping ..."; pills.players.textContent = "Ladue ...";
+  function measurePing() {
+    if (!cfg.ping) return;
+    var t0 = performance.now();
+    fetch("https://ladue.cc.cd/?ping=" + Date.now(), { cache: "no-store", mode: "no-cors" })
+      .then(function () { pills.ping.textContent = "Ping " + Math.round(performance.now() - t0) + " ms"; })
+      .catch(function () { pills.ping.textContent = "Ping offline"; });
+  }
+  function checkPlayers() {
+    if (!cfg.players) return;
+    fetch("https://api.mcsrvstat.us/3/ladue.cc.cd").then(function (r) { return r.json(); }).then(function (d) {
+      pills.players.textContent = d.online && d.players ? "Ladue " + d.players.online + "/" + d.players.max + " online" : "Ladue offline";
+    }).catch(function () {});
+  }
+  measurePing(); checkPlayers(); setInterval(measurePing, 5000); setInterval(checkPlayers, 60000);
   if (navigator.getBattery) navigator.getBattery().then(function (b) {
     function upd() { pills.battery.textContent = "Battery " + Math.round(b.level * 100) + "%" + (b.charging ? " +" : ""); }
     upd(); b.addEventListener("levelchange", upd); b.addEventListener("chargingchange", upd);
@@ -142,12 +166,15 @@
   }
   function applyFilter() {
     var c = gameCanvas(); if (!c) return;
-    c.style.filter = cfg.filter ? "brightness(" + cfg.brightness + "%) saturate(" + cfg.saturation + "%)" : "";
+    var P = { warm: " sepia(22%) hue-rotate(-8deg)", cool: " hue-rotate(12deg) saturate(110%)", vivid: " contrast(112%) saturate(140%)", night: " brightness(130%) contrast(90%)", gray: " grayscale(100%)" };
+    c.style.filter = cfg.filter ? "brightness(" + cfg.brightness + "%) saturate(" + cfg.saturation + "%)" + (P[cfg.filterPreset] || "") : "";
   }
   addEventListener("keydown", function (e) {
     if (keyMap[e.code]) keyMap[e.code].classList.add("on");
     if (menu.classList.contains("open")) return;
     if (cfg.zoom && e.code === cfg.zoomKey && !zooming) setZoom(true);
+    if (cfg.stopwatch && e.code === cfg.stopwatchKey && !e.repeat) { if (swRunning) { swAcc += Date.now() - swStart; swRunning = false; } else if (e.shiftKey) { swAcc = 0; } else { swStart = Date.now(); swRunning = true; } }
+    if (cfg.hideHudKey && e.code === "F4" && !e.repeat) { hudHidden = !hudHidden; renderHud(); }
     if (cfg.fullscreenKey && e.code === "F11") { e.preventDefault(); if (document.fullscreenElement) document.exitFullscreen(); else ROOT.requestFullscreen().catch(function () {}); }
   }, true);
   addEventListener("keyup", function (e) {
@@ -179,6 +206,13 @@
     clearInterval(flashTimer); flashTimer = null;
     document.title = originalTitle;
   }
+  var breakToast = el("div"); breakToast.id = "ax-break"; breakToast.style.cssText = "position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:99995;display:none;background:#1f3d7c;color:#fff;border:2px solid #fff;padding:10px 16px;font:700 14px Inter,system-ui,sans-serif;pointer-events:none";
+  breakToast.textContent = "Time for a break! Stretch and rest your eyes."; ROOT.appendChild(breakToast);
+  var nextBreak = Date.now() + cfg.breakMinutes * 60000;
+  setInterval(function () {
+    if (!cfg.breakReminder) { nextBreak = Date.now() + cfg.breakMinutes * 60000; return; }
+    if (Date.now() >= nextBreak) { breakToast.style.display = "block"; startFlash("Take a break!"); setTimeout(function () { breakToast.style.display = "none"; stopFlash(); }, 10000); nextBreak = Date.now() + cfg.breakMinutes * 60000; }
+  }, 5000);
   setInterval(function () {
     if (cfg.afk && Date.now() - lastActivity > cfg.afkMinutes * 60000) startFlash("AFK - come back!");
     else if (!(cfg.titleFlash && document.hidden)) stopFlash();
@@ -204,18 +238,28 @@
       opts: [["crosshairStyle", "Style", "select", [["plus", "Plus"], ["dot", "Dot"], ["circle", "Circle"]]]] },
     { id: "zoom", name: "Zoom", cat: "Visual", desc: "Hold a key to zoom in.",
       opts: [["zoomKey", "Key", "select", [["KeyC", "C"], ["KeyZ", "Z"], ["KeyV", "V"], ["AltLeft", "Left Alt"]]], ["zoomLevel", "Zoom", "range", [2, 6, 1]]] },
-    { id: "filter", name: "Color Filter", cat: "Visual", desc: "Brighten and boost colors.",
-      opts: [["brightness", "Brightness", "range", [60, 160, 5]], ["saturation", "Saturation", "range", [0, 200, 5]]] },
+    { id: "filter", name: "Color Filter", cat: "Visual", desc: "Brighten colors or pick a look: warm, cool, vivid, night or grayscale.",
+      opts: [["filterPreset", "Look", "select", [["custom", "Custom"], ["warm", "Warm"], ["cool", "Cool"], ["vivid", "Vivid"], ["night", "Night"], ["gray", "Grayscale"]]], ["brightness", "Brightness", "range", [60, 160, 5]], ["saturation", "Saturation", "range", [0, 200, 5]]] },
     { id: "fullscreenKey", name: "F11 Fullscreen", cat: "Utility", desc: "Press F11 to toggle fullscreen." },
     { id: "afk", name: "AFK Alert", cat: "Utility", desc: "Flashes the tab title if you go idle.",
       opts: [["afkMinutes", "Minutes", "range", [1, 30, 1]]] },
-    { id: "titleFlash", name: "Focus Reminder", cat: "Utility", desc: "Flashes the tab title when you tab away." }
+    { id: "titleFlash", name: "Focus Reminder", cat: "Utility", desc: "Flashes the tab title when you tab away." },
+    { id: "ping", name: "Ping", cat: "HUD", desc: "Round trip to the Ladue server relay, updated every 5 seconds." },
+    { id: "players", name: "Ladue Players", cat: "HUD", desc: "How many people are on the Ladue server right now." },
+    { id: "date", name: "Date", cat: "HUD", desc: "Today's date." },
+    { id: "stopwatch", name: "Stopwatch", cat: "HUD", desc: "Press the key to start or pause. Shift + key resets.",
+      opts: [["stopwatchKey", "Key", "select", [["KeyJ", "J"], ["KeyK", "K"], ["KeyH", "H"], ["F6", "F6"], ["F7", "F7"]]]] },
+    { id: "customText", name: "Custom Text", cat: "HUD", desc: "Your own label on screen: name, team or message.",
+      opts: [["customTextValue", "Text", "text"]] },
+    { id: "breakReminder", name: "Break Reminder", cat: "Utility", desc: "Reminds you to take a break every few minutes.",
+      opts: [["breakMinutes", "Minutes", "range", [10, 90, 5]]] },
+    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." }
   ];
   var CATS = ["All", "HUD", "Visual", "Utility", "Cosmetics", "Settings"];
 
   var menu = el("div"); menu.id = "ax-menu";
   var win = el("div", "ax-win");
-  var side = el("div", "ax-side", '<div class="ax-logo">ASTRA</div>');
+  var side = el("div", "ax-side", '<div class="ax-logo">LADUE</div>');
   var main = el("div", "ax-main");
   var top = el("div", "ax-top");
   var title = el("h3", "", "All mods");
@@ -254,6 +298,12 @@
       o[3].forEach(function (v) { var op = el("option", "", v[1]); op.value = v[0]; if (cfg[k] === v[0]) op.selected = true; s.appendChild(op); });
       s.onchange = function () { cfg[k] = s.value; save(); renderHud(); };
       row.appendChild(s);
+    } else if (o[2] === "text") {
+      var tx = el("input"); tx.type = "text"; tx.value = cfg[k] || ""; tx.maxLength = 40;
+      tx.style.cssText = "flex:1;background:#050a16;color:#fff;border:1px solid #1c3357;padding:3px 6px";
+      tx.oninput = function () { cfg[k] = tx.value; save(); };
+      tx.addEventListener("keydown", function (e) { e.stopPropagation(); }, true);
+      row.appendChild(tx);
     } else {
       var r = el("input"); r.type = "range"; r.min = o[3][0]; r.max = o[3][1]; r.step = o[3][2]; r.value = cfg[k];
       var v = el("span", "", cfg[k]);
@@ -284,7 +334,7 @@
   function drawSettings() {
     var c1 = el("div", "ax-mod", "<b>Accent color</b>");
     var sw = el("div", "ax-row");
-    ["#4fb3ff", "#7c5cff", "#2ee6d6", "#3ddc97", "#ffcf4a", "#ff5c8a", "#ffffff"].forEach(function (col) {
+    ["#ffffff", "#6f8fd6", "#4fb3ff", "#7c5cff", "#2ee6d6", "#3ddc97", "#ffcf4a", "#ff5c8a", "#ffffff"].forEach(function (col) {
       var b = el("button", "ax-sw" + (cfg.hudColor === col ? " on" : "")); b.style.background = col;
       b.onclick = function () { cfg.hudColor = col; save(); renderHud(); draw(); };
       sw.appendChild(b);
@@ -357,7 +407,7 @@
   renderHud();
   // the game rebuilds the page on boot; keep our elements attached and filters applied
   setInterval(function () {
-    [css, cross, menu, editbar].concat(Object.keys(hud).map(function (k) { return hud[k]; })).forEach(function (n) { if (!n.isConnected) ROOT.appendChild(n); });
+    [css, cross, menu, editbar, breakToast].concat(Object.keys(hud).map(function (k) { return hud[k]; })).forEach(function (n) { if (!n.isConnected) ROOT.appendChild(n); });
     applyFilter();
   }, 1000);
 })();

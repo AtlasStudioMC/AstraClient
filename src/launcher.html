@@ -386,7 +386,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
         <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
         <a class="btn big" href="#versions">Browse versions</a>
       </div>
-      <div class="meta"><span><b>5</b> versions</span><span><b>9</b> capes</span><span><b>11</b> mods</span><span>no install</span></div>
+      <div class="meta"><span><b>5</b> versions</span><span><b>9</b> capes</span><span><b>20</b> mods</span><span>no install</span></div>
     </div>
     <div class="hudfloat" aria-hidden="true">
       <div class="stack">
@@ -644,7 +644,7 @@ const load=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem
 let save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 const VERSIONS=[
-  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"Newest Minecraft. Multiplayer > Direct Connection > ladue.cc.cd",tag:["Latest","purple"],theme:false,cos:false,mods:false},
+  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"Newest Minecraft. Multiplayer > Direct Connection > ladue.cc.cd",tag:["Latest","purple"],theme:false,cos:false},
   {id:"v18",name:"1.8.8",full:"Ladue 1.8.8",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
   {id:"v18w",name:"1.8.8 WASM",full:"Ladue 1.8.8 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
   {id:"v112",name:"1.12.2",full:"Ladue 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Older",""],theme:true,cos:true},
@@ -747,11 +747,11 @@ uname.oninput=()=>{
 };
 
 /* ---------- mods page ---------- */
-const MODS=[["fps","FPS Counter","Frames per second","gauge"],["cps","CPS Counter","Left and right clicks per second","click"],["keystrokes","Keystrokes","WASD, mouse and space","keys"],["clock","Clock","Your local time","clock"],["session","Session Timer","How long you've played","clock"],["memory","Memory Usage","Browser memory used","gauge"],["battery","Battery","Laptop battery level","battery"],["crosshair","Custom Crosshair","Extra crosshair on top","cross"],["zoom","Zoom","Hold C to zoom in","eye"],["filter","Color Filter","Brighter, more vivid colors","brush"],["fullscreenKey","F11 Fullscreen","Toggle fullscreen with F11","expand"]];
+const MODS=[["fps","FPS Counter","Frames per second","gauge"],["cps","CPS Counter","Left and right clicks per second","click"],["keystrokes","Keystrokes","WASD, mouse and space","keys"],["clock","Clock","Your local time","clock"],["session","Session Timer","How long you've played","clock"],["memory","Memory Usage","Browser memory used","gauge"],["battery","Battery","Laptop battery level","battery"],["crosshair","Custom Crosshair","Extra crosshair on top","cross"],["zoom","Zoom","Hold C to zoom in","eye"],["filter","Color Filter","Brighter, more vivid colors","brush"],["fullscreenKey","F11 Fullscreen","Toggle fullscreen with F11","expand"],["ping","Ping","Round trip to the Ladue server","gauge"],["players","Ladue Players","Who is on the Ladue server","user"],["date","Date","Today's date","clock"],["stopwatch","Stopwatch","Start or pause with J","clock"],["customText","Custom Text","Your own label on screen","brush"],["breakReminder","Break Reminder","Reminds you to take a break","clock"],["hideHudKey","Hide HUD (F4)","Hide every overlay at once","eye"],["afk","AFK Alert","Flashes the tab if you go idle","clock"],["titleFlash","Focus Reminder","Flashes the tab when you tab away","eye"]];
 function renderMods(){
   $("#modOpts").innerHTML=MODS.map(([k,n,d])=>`<button class="opt" data-m="${k}"><div><b>${n}</b><small>${d}</small></div><span class="switch ${mods[k]?"on":""}"></span></button>`).join("");
   $$("#modOpts .opt").forEach(b=>b.onclick=()=>{mods[b.dataset.m]=!mods[b.dataset.m];save("astra.mods",mods);renderMods()});
-  $("#swatches").innerHTML=["#4fb3ff","#7c5cff","#2ee6d6","#3ddc97","#ff5c8a","#ffffff"].map(c=>`<button class="swatch ${mods.hudColor===c?"on":""}" style="background:${c}" data-col="${c}" aria-label="${c}"></button>`).join("");
+  $("#swatches").innerHTML=["#ffffff","#6f8fd6","#4fb3ff","#7c5cff","#2ee6d6","#3ddc97","#ff5c8a"].map(c=>`<button class="swatch ${mods.hudColor===c?"on":""}" style="background:${c}" data-col="${c}" aria-label="${c}"></button>`).join("");
   $$("#swatches .swatch").forEach(b=>b.onclick=()=>{mods.hudColor=b.dataset.col;save("astra.mods",mods);renderMods()});
 }
 

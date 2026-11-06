@@ -335,6 +335,27 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .jsteps li::before{content:counter(j);flex:none;width:1.6rem;height:1.6rem;display:grid;place-items:center;background:#fff;color:var(--navy);font-weight:800;font-size:.8rem}
 .jsteps code{background:#050c22;padding:.05rem .35rem;border:1px solid #fff2}
 @media (max-width:820px){.join{grid-template-columns:1fr}}
+
+/* mod editor */
+.modtools{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap;margin:1rem 0}
+.modtools input{flex:1;min-width:180px;background:#050c22;border:2px solid #2a4686;color:#fff;padding:.6rem .8rem;font:inherit}
+.modcats{display:flex;gap:.35rem;flex-wrap:wrap}
+.modcats button{background:#0c1838;border:2px solid #1c3266;color:#c3cfe8;padding:.45rem .7rem;font-weight:700;font-size:.82rem}
+.modcats button.on{background:#1f3d7c;border-color:#fff;color:#fff}
+.modlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.6rem}
+.mcard{background:#0c1838;border:2px solid #1c3266;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.55rem;transition:border-color .12s}
+.mcard.on{border-color:#3a5fae}.mcard:hover{border-color:#6f8fd6}
+.mrow{display:flex;align-items:center;gap:.7rem}.mrow b{flex:1}
+.mcard small{color:var(--muted);line-height:1.45}
+.mcat{font-size:.68rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#8fa6d8}
+.mopt{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:#c3cfe8}
+.mopt span:first-child{min-width:74px}
+.mopt select,.mopt input[type=text]{flex:1;background:#050c22;border:1px solid #2a4686;color:#fff;padding:.3rem .45rem;font:inherit}
+.mopt input[type=range]{flex:1;accent-color:#6f8fd6}
+.mopt output{min-width:2.4em;text-align:right;color:#fff;font-weight:700}
+.switch.on{background:#3a5fae}
+.switch{background:#1c2a4a}
+.swatches{display:flex;gap:.4rem;flex-wrap:wrap}
 </style>
 <script>window.LADUE_SITE_VERSION="dev";
 /* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
@@ -587,12 +608,14 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 
       <section class="page" data-page="mods">
         <h2>Mods</h2>
-        <p class="sub">These run in every version. Press <span class="kbd">RSHIFT</span> in game for the full mod menu with more options.</p>
-        <div class="opts" id="modOpts"></div>
-        <h2 style="font-size:1.3rem;margin:1.6rem 0 .8rem">HUD</h2>
-        <div class="opts">
-          <div class="opt"><div><b>Accent color</b><small>HUD and mod menu color</small><div class="swatches" id="swatches" style="margin-top:.6rem"></div></div></div>
-          <div class="opt"><div><b>HUD layout</b><small>Open the mod menu in game (Right Shift) and press Edit HUD layout to drag things around.</small></div></div></div>
+        <p class="sub">Turn mods on and set them up here. They run inside the game too: press <span class="kbd">RSHIFT</span> in game for the same menu, plus HUD dragging.</p>
+        <div class="modtools"><input id="modSearch" placeholder="Search mods" autocomplete="off"><div id="modCats" class="modcats"></div><button class="btn" id="modReset">Reset mods</button></div>
+        <div id="modOpts" class="modlist"></div>
+        <h2 style="font-size:1.3rem;margin:1.6rem 0 .8rem">HUD look</h2>
+        <div class="modlist">
+          <div class="mcard on"><div class="mrow"><b>Accent color</b></div><small>HUD pills and highlights</small><div class="swatches" id="swatches"></div></div>
+          <div class="mcard on" id="hudLook"></div>
+          <div class="mcard on"><div class="mrow"><b>HUD layout</b></div><small>Open the mod menu in game (Right Shift) and press Edit HUD layout to drag things anywhere.</small></div>
         </div>
       </section>
 
@@ -653,7 +676,6 @@ const VERSIONS=[
 
 let session=load("astra.session",{token:"",user:""});
 const cos=load("astra.cosmetics",{username:"",cape:"astra"});
-const mods=load("astra.mods",{fps:true,cps:true,keystrokes:true,clock:false,session:false,memory:false,battery:false,crosshair:false,zoom:true,filter:false,fullscreenKey:true,hudColor:"#4fb3ff"});
 const sets=load("astra.settings",{version:"v18",theme:true});
 if(!VERSIONS.some(v=>v.id===sets.version))sets.version=VERSIONS[0].id;
 
@@ -747,12 +769,77 @@ uname.oninput=()=>{
 };
 
 /* ---------- mods page ---------- */
-const MODS=[["fps","FPS Counter","Frames per second","gauge"],["cps","CPS Counter","Left and right clicks per second","click"],["keystrokes","Keystrokes","WASD, mouse and space","keys"],["clock","Clock","Your local time","clock"],["session","Session Timer","How long you've played","clock"],["memory","Memory Usage","Browser memory used","gauge"],["battery","Battery","Laptop battery level","battery"],["crosshair","Custom Crosshair","Extra crosshair on top","cross"],["zoom","Zoom","Hold C to zoom in","eye"],["filter","Color Filter","Brighter, more vivid colors","brush"],["fullscreenKey","F11 Fullscreen","Toggle fullscreen with F11","expand"],["ping","Ping","Round trip to the Ladue server","gauge"],["players","Ladue Players","Who is on the Ladue server","user"],["date","Date","Today's date","clock"],["stopwatch","Stopwatch","Start or pause with J","clock"],["customText","Custom Text","Your own label on screen","brush"],["breakReminder","Break Reminder","Reminds you to take a break","clock"],["hideHudKey","Hide HUD (F4)","Hide every overlay at once","eye"],["afk","AFK Alert","Flashes the tab if you go idle","clock"],["titleFlash","Focus Reminder","Flashes the tab when you tab away","eye"],["voice","Voice Chat","Talk with everyone, hold V","user"]];
+const MODS=[];
+/* ---------- mods page (same list as the in-game menu) ---------- */
+const MODDEFS=[
+    { id: "fps", name: "FPS Counter", cat: "HUD", desc: "Frames per second." },
+    { id: "cps", name: "CPS Counter", cat: "HUD", desc: "Left and right clicks per second." },
+    { id: "keystrokes", name: "Keystrokes", cat: "HUD", desc: "Shows WASD, mouse buttons and space." },
+    { id: "clock", name: "Clock", cat: "HUD", desc: "Your local time." },
+    { id: "session", name: "Session Timer", cat: "HUD", desc: "How long you've been playing." },
+    { id: "memory", name: "Memory Usage", cat: "HUD", desc: "Browser memory used (Chrome/Edge)." },
+    { id: "battery", name: "Battery", cat: "HUD", desc: "Battery level on laptops." },
+    { id: "crosshair", name: "Custom Crosshair", cat: "Visual", desc: "Extra crosshair on top of the game.",
+      opts: [["crosshairStyle", "Style", "select", [["plus", "Plus"], ["dot", "Dot"], ["circle", "Circle"]]]] },
+    { id: "zoom", name: "Zoom", cat: "Visual", desc: "Hold a key to zoom in.",
+      opts: [["zoomKey", "Key", "select", [["KeyC", "C"], ["KeyZ", "Z"], ["KeyV", "V"], ["AltLeft", "Left Alt"]]], ["zoomLevel", "Zoom", "range", [2, 6, 1]]] },
+    { id: "filter", name: "Color Filter", cat: "Visual", desc: "Brighten colors or pick a look: warm, cool, vivid, night or grayscale.",
+      opts: [["filterPreset", "Look", "select", [["custom", "Custom"], ["warm", "Warm"], ["cool", "Cool"], ["vivid", "Vivid"], ["night", "Night"], ["gray", "Grayscale"]]], ["brightness", "Brightness", "range", [60, 160, 5]], ["saturation", "Saturation", "range", [0, 200, 5]]] },
+    { id: "fullscreenKey", name: "F11 Fullscreen", cat: "Utility", desc: "Press F11 to toggle fullscreen." },
+    { id: "afk", name: "AFK Alert", cat: "Utility", desc: "Flashes the tab title if you go idle.",
+      opts: [["afkMinutes", "Minutes", "range", [1, 30, 1]]] },
+    { id: "titleFlash", name: "Focus Reminder", cat: "Utility", desc: "Flashes the tab title when you tab away." },
+    { id: "ping", name: "Ping", cat: "HUD", desc: "Round trip to the Ladue server relay, updated every 5 seconds." },
+    { id: "players", name: "Ladue Players", cat: "HUD", desc: "How many people are on the Ladue server right now." },
+    { id: "date", name: "Date", cat: "HUD", desc: "Today's date." },
+    { id: "stopwatch", name: "Stopwatch", cat: "HUD", desc: "Press the key to start or pause. Shift + key resets.",
+      opts: [["stopwatchKey", "Key", "select", [["KeyJ", "J"], ["KeyK", "K"], ["KeyH", "H"], ["F6", "F6"], ["F7", "F7"]]]] },
+    { id: "customText", name: "Custom Text", cat: "HUD", desc: "Your own label on screen: name, team or message.",
+      opts: [["customTextValue", "Text", "text"]] },
+    { id: "breakReminder", name: "Break Reminder", cat: "Utility", desc: "Reminds you to take a break every few minutes.",
+      opts: [["breakMinutes", "Minutes", "range", [10, 90, 5]]] },
+    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." },
+    { id: "voice", name: "Voice Chat", cat: "Utility", desc: "Talk with everyone on Ladue Client. Hold V to talk, or use open mic. Your browser asks for the microphone.",
+      opts: [["voiceMode", "Mode", "select", [["ptt", "Push to talk"], ["open", "Open mic"]]], ["voiceKey", "Talk key", "select", [["KeyV", "V"], ["KeyB", "B"], ["KeyG", "G"], ["CapsLock", "Caps Lock"], ["AltLeft", "Left Alt"]]], ["voiceVolume", "Volume", "range", [0, 100, 5]]] }
+  ];
+const MOD_DEFAULTS={
+    fps: true, cps: true, keystrokes: true, clock: false, session: false, memory: false, battery: false,
+    crosshair: false, crosshairStyle: "plus", zoom: true, zoomKey: "KeyC", zoomLevel: 3,
+    filter: false, brightness: 110, saturation: 115, fullscreenKey: true,
+    afk: false, afkMinutes: 5, titleFlash: false,
+    ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
+    breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
+    voice: false, voiceMode: "ptt", voiceKey: "KeyV", voiceVolume: 100,
+    hudColor: "#ffffff", hudBg: 60, hudScale: 100
+  };
+const mods=Object.assign({},MOD_DEFAULTS,load("astra.mods",{}));
+let modCat="All";
+function modOption(o){
+  const [k,label,kind,arg]=o,row=document.createElement("label");row.className="mopt";
+  row.innerHTML="<span>"+label+"</span>";
+  if(kind==="select"){const s=document.createElement("select");arg.forEach(([v,n])=>{const op=new Option(n,v);if(mods[k]===v)op.selected=true;s.add(op)});s.onchange=()=>{mods[k]=s.value;save("astra.mods",mods)};row.appendChild(s)}
+  else if(kind==="text"){const t=document.createElement("input");t.type="text";t.maxLength=40;t.value=mods[k]||"";t.oninput=()=>{mods[k]=t.value;save("astra.mods",mods)};row.appendChild(t)}
+  else{const r=document.createElement("input"),out=document.createElement("output");r.type="range";[r.min,r.max,r.step]=arg;r.value=mods[k];out.textContent=mods[k];r.oninput=()=>{mods[k]=+r.value;out.textContent=r.value;save("astra.mods",mods)};row.append(r,out)}
+  return row;
+}
 function renderMods(){
-  $("#modOpts").innerHTML=MODS.map(([k,n,d])=>`<button class="opt" data-m="${k}"><div><b>${n}</b><small>${d}</small></div><span class="switch ${mods[k]?"on":""}"></span></button>`).join("");
-  $$("#modOpts .opt").forEach(b=>b.onclick=()=>{mods[b.dataset.m]=!mods[b.dataset.m];save("astra.mods",mods);renderMods()});
-  $("#swatches").innerHTML=["#ffffff","#6f8fd6","#4fb3ff","#7c5cff","#2ee6d6","#3ddc97","#ff5c8a"].map(c=>`<button class="swatch ${mods.hudColor===c?"on":""}" style="background:${c}" data-col="${c}" aria-label="${c}"></button>`).join("");
+  const cats=["All",...new Set(MODDEFS.map(m=>m.cat))];
+  $("#modCats").innerHTML=cats.map(c=>{const n=MODDEFS.filter(m=>(c==="All"||m.cat===c)&&mods[m.id]).length;return `<button data-c="${c}" class="${c===modCat?"on":""}">${c} ${n}</button>`}).join("");
+  $$("#modCats button").forEach(b=>b.onclick=()=>{modCat=b.dataset.c;renderMods()});
+  const q=($("#modSearch").value||"").trim().toLowerCase();
+  const list=$("#modOpts");list.innerHTML="";
+  MODDEFS.filter(m=>(modCat==="All"||m.cat===modCat)&&(!q||(m.name+" "+m.desc).toLowerCase().includes(q))).forEach(m=>{
+    const card=document.createElement("div");card.className="mcard"+(mods[m.id]?" on":"");
+    card.innerHTML=`<div class="mcat">${m.cat}</div><div class="mrow"><b>${m.name}</b><button class="switch ${mods[m.id]?"on":""}" aria-label="Toggle ${m.name}"></button></div><small>${m.desc}</small>`;
+    card.querySelector(".switch").onclick=()=>{mods[m.id]=!mods[m.id];save("astra.mods",mods);renderMods()};
+    if(m.opts&&mods[m.id])m.opts.forEach(o=>card.appendChild(modOption(o)));
+    list.appendChild(card);
+  });
+  if(!list.children.length)list.innerHTML='<p class="sub">No mods match that search.</p>';
+  $("#swatches").innerHTML=["#ffffff","#6f8fd6","#4fb3ff","#7c5cff","#2ee6d6","#3ddc97","#ffcf4a","#ff5c8a"].map(c=>`<button class="swatch ${mods.hudColor===c?"on":""}" style="background:${c}" data-col="${c}" aria-label="Accent ${c}"></button>`).join("");
   $$("#swatches .swatch").forEach(b=>b.onclick=()=>{mods.hudColor=b.dataset.col;save("astra.mods",mods);renderMods()});
+  const look=$("#hudLook");look.innerHTML='<div class="mrow"><b>HUD size and background</b></div>';
+  look.append(modOption(["hudScale","Size","range",[60,160,10]]),modOption(["hudBg","Background","range",[0,100,5]]));
 }
 
 /* ---------- settings page ---------- */
@@ -761,6 +848,8 @@ function renderSettings(){
   $("#setOpts").innerHTML=S.map(([k,n,d])=>`<button class="opt" data-s="${k}"><div><b>${n}</b><small>${d}</small></div><span class="switch ${sets[k]?"on":""}"></span></button>`).join("");
   $$("#setOpts .opt").forEach(b=>b.onclick=()=>{sets[b.dataset.s]=!sets[b.dataset.s];save("astra.settings",sets);renderSettings()});
 }
+$("#modSearch").oninput=()=>renderMods();
+$("#modReset").onclick=()=>{Object.keys(mods).forEach(k=>delete mods[k]);Object.assign(mods,MOD_DEFAULTS);save("astra.mods",mods);renderMods()};
 $("#resetBtn").onclick=()=>{["astra.cosmetics","astra.mods","astra.settings"].forEach(k=>localStorage.removeItem(k));location.reload()};
 
 /* ---------- launch ---------- */
@@ -829,7 +918,7 @@ function applyPresets(p){
   if(!VERSIONS.some(v=>v.id===sets.version))sets.version=VERSIONS[0].id;
   save("astra.cosmetics",cos);save("astra.mods",mods);save("astra.settings",sets);
   $("#uname").value=cos.username||"";
-  $("#modGrid").innerHTML=MODS.map(m=>`<div class="modchip"><i data-ico="${m[3]||"sliders"}"></i>${m[1]}</div>`).join("");
+  $("#modGrid").innerHTML=MODDEFS.map(m=>`<div class="modchip"><i data-ico="sliders"></i>${m.name}</div>`).join("");
 renderVersions();renderCosmetics();renderChip();renderMods();renderSettings();
 }
 function queueSync(){
@@ -874,7 +963,7 @@ async function restoreSession(){
   renderAccount();
 }
 
-$("#modGrid").innerHTML=MODS.map(m=>`<div class="modchip"><i data-ico="${m[3]||"sliders"}"></i>${m[1]}</div>`).join("");
+$("#modGrid").innerHTML=MODDEFS.map(m=>`<div class="modchip"><i data-ico="sliders"></i>${m.name}</div>`).join("");
 renderVersions();renderCosmetics();renderChip();renderMods();renderSettings();
 paintIcons();renderAccount();restoreSession();
 if(location.hash==="#launcher")openApp("play");

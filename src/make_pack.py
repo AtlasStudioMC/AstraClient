@@ -245,7 +245,7 @@ def cape_void():
     frame(face, (92, 40, 160))
     return face
 
-DESIGNS = [("astra", "Astra", cape_astra), ("nebula", "Nebula", cape_nebula), ("ocean", "Ocean", cape_ocean),
+DESIGNS = [("astra", "Ladue", cape_astra), ("nebula", "Nebula", cape_nebula), ("ocean", "Ocean", cape_ocean),
            ("aurora", "Aurora", cape_aurora), ("frost", "Frost", cape_frost), ("midnight", "Midnight", cape_midnight),
            ("ember", "Ember", cape_ember), ("void", "Void", cape_void)]
 

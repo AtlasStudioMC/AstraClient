@@ -12,10 +12,11 @@ strip = Image.new("RGB", (hero.width * 2, hero.height))
 strip.paste(hero, (0, 0)); strip.paste(ImageOps.mirror(hero), (hero.width, 0))
 strip = strip.resize((S * 4, S), Image.LANCZOS)
 # Pull it toward Ladue navy and white.
-strip = ImageEnhance.Color(strip).enhance(0.85)
+strip = ImageEnhance.Color(strip).enhance(0.92)
 tint = Image.new("RGB", strip.size, NAVY)
-strip = Image.blend(strip, tint, 0.28)
-strip = ImageEnhance.Contrast(strip).enhance(1.08)
+strip = Image.blend(strip, tint, 0.18)
+strip = ImageEnhance.Contrast(strip).enhance(1.12)
+strip = ImageEnhance.Brightness(strip).enhance(0.96)
 
 faces = {}
 for i in range(4):                         # 0 front, 1 right, 2 back, 3 left
@@ -25,12 +26,17 @@ bottom_color = strip.crop((0, S - 8, S * 4, S)).resize((1, 1), Image.LANCZOS).ge
 faces[4] = Image.new("RGB", (S, S), top_color).filter(ImageFilter.GaussianBlur(2))
 faces[5] = Image.new("RGB", (S, S), bottom_color)
 
-# Faint crest high on the front face, so the title screen is clearly Ladue.
-crest = Image.open(root / "src/pack/logo.png").convert("RGBA").resize((300, 300), Image.LANCZOS)
-mask = Image.new("L", crest.size, 0); ImageDraw.Draw(mask).ellipse((0, 0, 299, 299), fill=150)
-faces[2].paste(crest, (S // 2 - 150, S // 2 - 150), mask)
+# Clear Ladue crest on the back face, with a soft navy glow so it reads over the sky.
+crest = Image.open(root / "src/pack/logo_clear.png").convert("RGBA").resize((340, 340), Image.LANCZOS)
+glow = Image.new("RGBA", (S, S), (0, 0, 0, 0))
+halo = Image.new("L", (S, S), 0); ImageDraw.Draw(halo).ellipse((S//2 - 230, S//2 - 230, S//2 + 230, S//2 + 230), fill=120)
+halo = halo.filter(ImageFilter.GaussianBlur(60))
+glow.paste(Image.new("RGBA", (S, S), (12, 30, 80, 255)), (0, 0), halo)
+back = faces[2].convert("RGBA"); back.alpha_composite(glow)
+back.alpha_composite(crest, (S // 2 - 170, S // 2 - 170))
+faces[2] = back.convert("RGB")
 
-icon = Image.open(root / "src/pack/logo.png").convert("RGB").resize((128, 128), Image.LANCZOS)
+icon = Image.open(root / "src/pack/logo_clear.png").convert("RGBA").resize((128, 128), Image.LANCZOS)
 splashes = "\n".join([
     "Go Rams!", "Ladue Horton Watkins!", "Veritas, Sapientia, Honor, Amicitia!", "ladue.cc.cd",
     "Now on 26.2!", "Made for LHWHS!", "Play in your browser!", "Join the Ladue server!",
@@ -49,5 +55,5 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
     for i, f in faces.items():
         z.writestr(f"assets/minecraft/textures/gui/title/background/panorama_{i}.png", png(f))
     z.writestr("assets/minecraft/texts/splashes.txt", splashes)
-faces[2].resize((512, 512)).save(root.resolve().parent / "_rp/preview_front.png")
+faces[2].resize((512, 512)).save(root.resolve().parent / "_rp/preview_back.png")
 print(out, out.stat().st_size // 1024, "KB")

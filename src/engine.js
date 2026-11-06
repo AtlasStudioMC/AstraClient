@@ -173,12 +173,14 @@ async function installLaduePack(){
   const db=await new Promise((ok,no)=>{const r=indexedDB.open(LADUE_DB,1);
     r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('filesystem'))r.result.createObjectStore('filesystem',{keyPath:['path']})};
     r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
-  const files=await (await fetch('games/ladue-pack.json?v=86dbff1e8d',{cache:'no-cache'})).json();
+  const files=await (await fetch('games/ladue-pack.json?v=23672a4f78',{cache:'no-cache'})).json();
   await new Promise((ok,no)=>{const tx=db.transaction('filesystem','readwrite'),st=tx.objectStore('filesystem');
     const put=(path,bytes)=>st.put({path,data:bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
     put('resourcepacks/.eaglerfsdir',new Uint8Array(0));
     put('resourcepacks/'+LADUE_PACK+'/.eaglerfsdir',new Uint8Array(0));
     for(const [name,b64] of Object.entries(files))put('resourcepacks/'+LADUE_PACK+'/'+name,Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));
+    // first launch only: put the Ladue server in Multiplayer so players just click Join
+    const has=st.get(['servers.dat']);has.onsuccess=()=>{if(!has.result)put('servers.dat',nbtWrite({t:10,v:new Map([['servers',{t:9,et:10,v:[{t:10,v:new Map([['name',{t:8,v:'Ladue Horton Watkins'}],['ip',{t:8,v:'ladue.cc.cd'}]])}]}]])}))};
     tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});
   db.close();
   if(localStorage.getItem('ladue.pack.enabled'))return; // only switch it on the first time

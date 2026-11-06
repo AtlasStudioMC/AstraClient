@@ -17,6 +17,7 @@ GAMES = {
     "v18w": ("EaglercraftX_1.8_u53_WASM-GC_Offline.html", "astra_worlds_1_8"),
     "v112": ("Eaglercraft_1.12.2_u3_Offline.html", "astra_worlds_1_12"),
     "v152": ("Eaglercraft_1.5.2_sp2.01_Offline.html", None),
+    "v262": ("eaglercraft-26.2-8c167d43.html", "ladue_worlds_26_2"),
 }
 
 capes = [{k: c[k] for k in ("id", "name", "png", "data")} for c in json.loads((src / "pack/capes.json").read_text())]
@@ -43,7 +44,7 @@ BRAND_PATCHES = {
     "v18": [('case 0:return C(644);default:', 'case 0:return "Astra (eagler)";default:')],
     "v112": [('"vanilla"', '"Astra (vanilla)"')],
 }
-TITLES = {"v18": "Ladue Client 1.8.8", "v18w": "Ladue Client 1.8.8", "v112": "Ladue Client 1.12.2", "v152": "Ladue Client 1.5.2"}
+TITLES = {"v262": "Ladue Client 26.2", "v18": "Ladue Client 1.8.8", "v18w": "Ladue Client 1.8.8", "v112": "Ladue Client 1.12.2", "v152": "Ladue Client 1.5.2"}
 
 def rebrand(html, id_):
     pairs = REBRAND.get(id_, [])

@@ -337,7 +337,7 @@ i[data-ico] svg{width:100%;height:100%;display:block}
   <div class="wrap">
     <section class="block" id="start">
       <div class="steps">
-        <div class="step reveal"><b>01</b><h3>Pick a version</h3><p>Four browser builds from 1.5.2 to 1.12.2, plus 26.2 on the Ladue server. Each keeps its own worlds and settings.</p></div>
+        <div class="step reveal"><b>01</b><h3>Pick a version</h3><p>Five builds, from 1.5.2 up to 26.2. Each keeps its own worlds and settings. Each keeps its own worlds and settings.</p></div>
         <div class="step reveal"><b>02</b><h3>Set up your look</h3><p>Choose a cape and username in the launcher. They're applied the moment the game starts.</p></div>
         <div class="step reveal"><b>03</b><h3>Play</h3><p>Singleplayer offline, or join servers. Press RSHIFT any time for the mod menu.</p></div>
       </div>
@@ -545,9 +545,10 @@ const load=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem
 let save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 const VERSIONS=[
+  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"The newest Minecraft, same version as the Ladue server",tag:["Latest","purple"],theme:false,cos:false,mods:false},
   {id:"v18",name:"1.8.8",full:"Ladue 1.8.8",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
   {id:"v18w",name:"1.8.8 WASM",full:"Ladue 1.8.8 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
-  {id:"v112",name:"1.12.2",full:"Ladue 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Newest",""],theme:true,cos:true},
+  {id:"v112",name:"1.12.2",full:"Ladue 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Older",""],theme:true,cos:true},
   {id:"v152",name:"1.5.2",full:"Ladue 1.5.2",desc:"The classic original build",tag:["Classic","gray"],theme:false,cos:false}
 ].filter(v=>document.getElementById(v.id)||(window.ASTRA_HOSTED||[]).includes(v.id));
 
@@ -568,8 +569,7 @@ async function drawCape(canvas,cape){
 
 /* ---------- website ---------- */
 /* ---------- website ---------- */
-$("#siteVersions").innerHTML=`<div class="vrow"><div class="vnum">26.2</div><div><h3>Ladue 26.2 <span class="tag purple">Java</span></h3><p>The Ladue server runs Minecraft 26.2. Join from Java Edition: fr1.spaceify.eu:25010.</p><div class="vfeat"><span><i data-ico="check"></i>Latest version</span><span><i data-ico="save"></i>Ladue server</span></div></div><button class="btn primary" id="copy262"><i data-ico="play"></i>Copy IP</button></div>`+VERSIONS.map(v=>`<div class="vrow${v.tag[0]==="Recommended"?" rec":""}"><div class="vnum">${v.name}</div><div><h3>${v.full} <span class="tag ${v.tag[1]}">${v.tag[0]}</span></h3><p>${v.desc}.</p><div class="vfeat"><span><i data-ico="check"></i>Mod menu</span><span class="${v.cos?"":"off"}"><i data-ico="${v.cos?"check":"x"}"></i>Capes</span><span class="${v.theme?"":"off"}"><i data-ico="${v.theme?"check":"x"}"></i>Ladue menu</span><span><i data-ico="save"></i>Own worlds</span></div></div><button class="btn primary" data-launch="${v.id}"><i data-ico="play"></i>Play</button></div>`).join("");
-{const c=document.getElementById("copy262");if(c)c.onclick=async()=>{try{await navigator.clipboard.writeText("fr1.spaceify.eu:25010");c.lastChild.textContent="Copied!"}catch(e){c.lastChild.textContent="fr1.spaceify.eu:25010"}setTimeout(()=>c.lastChild.textContent="Copy IP",1800)}}
+$("#siteVersions").innerHTML=VERSIONS.map(v=>`<div class="vrow${v.tag[0]==="Recommended"?" rec":""}"><div class="vnum">${v.name}</div><div><h3>${v.full} <span class="tag ${v.tag[1]}">${v.tag[0]}</span></h3><p>${v.desc}.</p><div class="vfeat"><span class="${v.mods===false?"off":""}"><i data-ico="${v.mods===false?"x":"check"}"></i>Mod menu</span><span class="${v.cos?"":"off"}"><i data-ico="${v.cos?"check":"x"}"></i>Capes</span><span class="${v.theme?"":"off"}"><i data-ico="${v.theme?"check":"x"}"></i>Ladue menu</span><span><i data-ico="save"></i>Own worlds</span></div></div><button class="btn primary" data-launch="${v.id}"><i data-ico="play"></i>Play</button></div>`).join("");
 $("#siteCapes").innerHTML=ASTRA_CAPES.map(c=>`<button class="cape-tile" data-cape="${c.id}"><canvas width="11" height="17"></canvas><b>${c.name}</b><small>Equip</small></button>`).join("");
 $$("#siteCapes .cape-tile").forEach(b=>{
   const c=ASTRA_CAPES.find(x=>x.id===b.dataset.cape);

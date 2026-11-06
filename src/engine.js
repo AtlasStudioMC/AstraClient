@@ -14,7 +14,7 @@ async function unpack(id,onProgress){
     })()}});
   }else{
     // hosted build: download the gzipped game file
-    const res=await fetch('games/'+id+'.bin');
+    const res=await fetch('games/'+id+'.bin?v=0b974a5be5',{cache:'no-cache'});
     if(!res.ok)throw new Error('could not download game ('+res.status+')');
     const total=+res.headers.get('content-length')||0;let got=0;
     const reader=res.body.getReader();

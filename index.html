@@ -711,7 +711,7 @@ const load=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem
 let save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 const VERSIONS=[
-  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"The newest Minecraft, same version as the Ladue server",tag:["Latest","purple"],theme:false,cos:false,mods:false},
+  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"Newest Minecraft. Multiplayer > Direct Connection > ladue.cc.cd",tag:["Latest","purple"],theme:false,cos:false,mods:false},
   {id:"v18",name:"1.8.8",full:"Ladue 1.8.8",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
   {id:"v18w",name:"1.8.8 WASM",full:"Ladue 1.8.8 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
   {id:"v112",name:"1.12.2",full:"Ladue 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Older",""],theme:true,cos:true},

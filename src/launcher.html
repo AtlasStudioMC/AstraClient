@@ -219,6 +219,7 @@ footer.foot a:hover{color:#fff}
 .vcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 10px 30px #2f7fff33}
 .vcard .vn{font-family:var(--px);font-size:1.35rem}
 .vcard small{color:var(--muted);font-size:.8rem}
+.vcard .tag{align-self:flex-start}
 .playbar{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
 #playBtn{min-width:240px;font-size:1.3rem;padding:1.1rem 2rem;font-family:var(--px)}
 #status{color:#9fd0ff;min-height:1.3rem;font-weight:600}
@@ -449,9 +450,9 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
             <h3>Play in your browser</h3>
             <ol class="jsteps">
               <li><span>Press <b>Play</b> on Ladue 26.2 below.</span></li>
-              <li><span>Open <b>Multiplayer</b>, then <b>Direct Connection</b>.</span></li>
-              <li><span>Keep the mode on <b>Wisp</b> and type <code>ladue.cc.cd</code>.</span></li>
-              <li><span>Press <b>Join Server</b>. Java Edition players just add <code>ladue.cc.cd</code>.</span></li>
+              <li><span>Open <b>Multiplayer</b>. <b>Ladue</b> is already in your server list.</span></li>
+              <li><span>Double-click <b>Ladue</b> to join. Press <b>Right Shift</b> in game for mods.</span></li>
+              <li><span>On Java Edition instead? Add <code>ladue.cc.cd</code> as a server.</span></li>
             </ol>
           </div>
           <div class="jcard">
@@ -667,7 +668,7 @@ const load=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem
 let save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 const VERSIONS=[
-  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"Newest Minecraft. Multiplayer > Direct Connection > ladue.cc.cd",tag:["Latest","purple"],theme:false,cos:false},
+  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"Newest Minecraft. Ladue server is already in Multiplayer",tag:["Latest","purple"],theme:false,cos:false},
   {id:"v18",name:"1.8.8",full:"Ladue 1.8.8",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
   {id:"v18w",name:"1.8.8 WASM",full:"Ladue 1.8.8 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
   {id:"v112",name:"1.12.2",full:"Ladue 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Older",""],theme:true,cos:true},
@@ -781,7 +782,7 @@ const MODDEFS=[
     { id: "battery", name: "Battery", cat: "HUD", desc: "Battery level on laptops." },
     { id: "crosshair", name: "Custom Crosshair", cat: "Visual", desc: "Extra crosshair on top of the game.",
       opts: [["crosshairStyle", "Style", "select", [["plus", "Plus"], ["dot", "Dot"], ["circle", "Circle"]]]] },
-    { id: "zoom", name: "Zoom", cat: "Visual", desc: "Hold a key to zoom in.",
+    { id: "zoom", name: "Zoom", cat: "Visual", desc: "Hold a key to zoom in. Scroll while zooming to zoom further.",
       opts: [["zoomKey", "Key", "select", [["KeyC", "C"], ["KeyZ", "Z"], ["KeyV", "V"], ["AltLeft", "Left Alt"]]], ["zoomLevel", "Zoom", "range", [2, 6, 1]]] },
     { id: "filter", name: "Color Filter", cat: "Visual", desc: "Brighten colors or pick a look: warm, cool, vivid, night or grayscale.",
       opts: [["filterPreset", "Look", "select", [["custom", "Custom"], ["warm", "Warm"], ["cool", "Cool"], ["vivid", "Vivid"], ["night", "Night"], ["gray", "Grayscale"]]], ["brightness", "Brightness", "range", [60, 160, 5]], ["saturation", "Saturation", "range", [0, 200, 5]]] },
@@ -810,7 +811,7 @@ const MOD_DEFAULTS={
     ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
     breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
     voice: false, voiceMode: "ptt", voiceKey: "KeyV", voiceVolume: 100,
-    hudColor: "#ffffff", hudBg: 60, hudScale: 100
+    hudColor: "#ffffff", hudBg: 60, hudScale: 100, menuButton: true
   };
 const mods=Object.assign({},MOD_DEFAULTS,load("astra.mods",{}));
 let modCat="All";

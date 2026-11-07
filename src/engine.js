@@ -14,7 +14,7 @@ async function unpack(id,onProgress){
     })()}});
   }else{
     // hosted build: download the gzipped game file
-    const res=await fetch('games/'+id+'.bin?v=cfd9fd2191',{cache:'no-cache'});
+    const res=await fetch('games/'+id+'.bin?v=6e2bb149c3',{cache:'no-cache'});
     if(!res.ok)throw new Error('could not download game ('+res.status+')');
     const total=+res.headers.get('content-length')||0;let got=0;
     const reader=res.body.getReader();
@@ -88,7 +88,7 @@ async function enablePack(lsKey){
 }
 
 // ---- cosmetics: write username + cape straight into the Eaglercraft profile (NBT in localStorage) ----
-const PROFILE_KEYS={v18:'_eaglercraftX.p',v18w:'_eaglercraftX.p',v112:'_eaglercraft_1.12.p'};
+const PROFILE_KEYS={v263:'_eaglercraftX.p',v18:'_eaglercraftX.p',v18w:'_eaglercraftX.p',v112:'_eaglercraft_1.12.p'};
 function nbtRead(bytes){
   const dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let p=0;const dec=new TextDecoder();
   const str=()=>{const n=dv.getUint16(p);p+=2;const s=dec.decode(bytes.subarray(p,p+n));p+=n;return s};
@@ -164,7 +164,7 @@ async function applyCosmetics(v,cos){
     localStorage.setItem(key,btoa(bin));
   }catch(e){console.warn('Astra: could not apply cosmetics',e)}
 }
-// ---- Ladue resource pack, built in for 26.2 ----
+// ---- Ladue resource pack, built in for 26.3 ----
 // Writes the pack into the game's own file store and turns it on, once per browser, so a
 // player who later switches it off in Options keeps it off.
 const LADUE_PACK='ladue';
@@ -179,8 +179,15 @@ async function installLaduePack(){
     put('resourcepacks/.eaglerfsdir',new Uint8Array(0));
     put('resourcepacks/'+LADUE_PACK+'/.eaglerfsdir',new Uint8Array(0));
     for(const [name,b64] of Object.entries(files))put('resourcepacks/'+LADUE_PACK+'/'+name,Uint8Array.from(atob(b64),c=>c.charCodeAt(0)));
-    // first launch only: put the Ladue server in Multiplayer so players just click Join
-    const has=st.get(['servers.dat']);has.onsuccess=()=>{if(!has.result)put('servers.dat',nbtWrite({t:10,v:new Map([['servers',{t:9,et:10,v:[{t:10,v:new Map([['name',{t:8,v:'Ladue Horton Watkins'}],['ip',{t:8,v:'ladue.cc.cd'}]])}]}]])}))};
+    // Multiplayer list: keep the player's own servers, drop leftovers from older builds
+    const has=st.get(['servers.dat']);has.onsuccess=()=>{
+      let list=[];
+      try{const d=has.result&&has.result.data;if(d)list=nbtRead(new Uint8Array(d)).v.get('servers').v}catch(e){list=[]}
+      const s=(e,k)=>{const x=e.v.get(k);return x?String(x.v):''};
+      // drop old ArchMC entries and the launcher-made Ladue entry; the game pins its own Ladue entry
+      list=list.filter(e=>!/0.0.0.0|arch.mc|archmc/i.test(s(e,'ip')+' '+s(e,'name'))&&s(e,'ip')!=='ladue.cc.cd');
+      put('servers.dat',nbtWrite({t:10,v:new Map([['servers',{t:9,et:10,v:list}]])}));
+    };
     tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});
   db.close();
   if(localStorage.getItem('ladue.pack.enabled'))return; // only switch it on the first time

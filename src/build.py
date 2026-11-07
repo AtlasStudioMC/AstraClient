@@ -17,7 +17,7 @@ GAMES = {
     "v18w": ("EaglercraftX_1.8_u53_WASM-GC_Offline.html", "astra_worlds_1_8"),
     "v112": ("Eaglercraft_1.12.2_u3_Offline.html", "astra_worlds_1_12"),
     "v152": ("Eaglercraft_1.5.2_sp2.01_Offline.html", None),
-    "v262": ("eaglercraft-26.2-8c167d43.html", "ladue_worlds_26_2"),
+    "v263": ("eaglercraft-26.3-8c167d43.html", "ladue_worlds_26_2"),
 }
 
 capes = [{k: c[k] for k in ("id", "name", "png", "data")} for c in json.loads((src / "pack/capes.json").read_text())]

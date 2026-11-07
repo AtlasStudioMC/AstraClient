@@ -9,7 +9,6 @@
     afk: false, afkMinutes: 5, titleFlash: false,
     ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
     breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
-    voice: false, voiceMode: "ptt", voiceKey: "KeyV", voiceVolume: 100,
     hudColor: "#ffffff", hudBg: 60, hudScale: 100, menuButton: true
   };
   var cfg = load(MODS_KEY, DEFAULTS), hudHidden = false;
@@ -17,7 +16,7 @@
   function load(k, d) { try { return Object.assign({}, d, JSON.parse(localStorage.getItem(k) || "{}")); } catch (e) { return Object.assign({}, d); } }
   function save() { try { localStorage.setItem(MODS_KEY, JSON.stringify(cfg)); } catch (e) {} }
   // true while the player is in the world (mouse captured); hotkeys only fire then, so typing in chat
-  // or a sign never zooms, starts the stopwatch or opens the mic
+  // or a sign never zooms or starts the stopwatch
   function inWorld() { return !!document.pointerLockElement; }
   var TOUCH = !!(window.matchMedia && matchMedia("(pointer: coarse)").matches);
 
@@ -103,7 +102,7 @@
 
   /* ---------------- HUD elements ---------------- */
   // Elements the player has not dragged stack down the top-left corner in this order, with no gaps.
-  var ORDER = ["fps", "cps", "ping", "players", "clock", "date", "session", "stopwatch", "memory", "battery", "voice", "customText", "keystrokes"];
+  var ORDER = ["fps", "cps", "ping", "players", "clock", "date", "session", "stopwatch", "memory", "battery", "customText", "keystrokes"];
   var hud = {};
   function hudEl(id, inner) {
     var d = el("div", "ah"); d.dataset.id = id; d.appendChild(inner); ROOT.appendChild(d); hud[id] = d; return d;
@@ -235,14 +234,13 @@
     var f = cfg.filter ? "brightness(" + cfg.brightness + "%) saturate(" + cfg.saturation + "%)" + (P[cfg.filterPreset] || "") : "";
     if (c.style.filter !== f) c.style.filter = f;
   }
-  function voiceKeyHeld(e) { return cfg.voice && cfg.voiceMode === "ptt" && e.code === cfg.voiceKey; }
   addEventListener("keydown", function (e) {
     if (keyMap[e.code]) keyMap[e.code].classList.add("on");
     if (menu.classList.contains("open")) return;
     if (cfg.hideHudKey && e.code === "F4" && !e.repeat) { hudHidden = !hudHidden; renderHud(); toast(hudHidden ? "HUD hidden (F4 to show)" : "HUD shown", 1500); }
     if (cfg.fullscreenKey && e.code === "F11") { e.preventDefault(); if (document.fullscreenElement) document.exitFullscreen(); else ROOT.requestFullscreen().catch(function () {}); }
     if (!inWorld()) return;
-    if (cfg.zoom && e.code === cfg.zoomKey && !zooming && !voiceKeyHeld(e)) setZoom(true);
+    if (cfg.zoom && e.code === cfg.zoomKey && !zooming) setZoom(true);
     if (cfg.stopwatch && e.code === cfg.stopwatchKey && !e.repeat) { if (swRunning) { swAcc += Date.now() - swStart; swRunning = false; } else if (e.shiftKey) { swAcc = 0; } else { swStart = Date.now(); swRunning = true; } }
   }, true);
   addEventListener("keyup", function (e) {
@@ -296,117 +294,6 @@
     });
   }
 
-  /* ---------------- voice chat ----------------
-     One Ladue voice channel for everyone on the site. wss://ladue.cc.cd/voice only introduces
-     players and passes WebRTC setup messages; audio goes straight between browsers. */
-  var V = { ws: null, mic: null, peers: {}, names: {}, talking: {}, me: 0, held: false, denied: false, starting: false, retry: 0, status: "Voice off" };
-  var ICE = [{ urls: "stun:stun.cloudflare.com:3478" }, { urls: "stun:stun.l.google.com:19302" }];
-  function voiceName() {
-    try { var u = localStorage.getItem("_eaglercraftX.username"); if (u) return atob(u); } catch (e) {}
-    return cos.username || "Player";
-  }
-  function voiceHud() {
-    if (!cfg.voice) return;
-    var n = Object.keys(V.peers).length, who = Object.keys(V.talking).filter(function (id) { return V.talking[id]; }).map(function (id) { return V.names[id] || "?"; });
-    var me = micLive() ? "🎙 " : "";
-    pills.voice.textContent = V.ws && V.ws.readyState === 1 ? me + "Voice " + (n + 1) + " in channel" + (who.length ? " | " + who.join(", ") : "") : V.status;
-  }
-  function micLive() { return !!(V.mic && V.mic.getAudioTracks()[0] && V.mic.getAudioTracks()[0].enabled); }
-  function setMic(on) {
-    if (!V.mic) return;
-    var was = micLive();
-    V.mic.getAudioTracks().forEach(function (t) { t.enabled = on; });
-    if (was !== on && V.ws && V.ws.readyState === 1) V.ws.send(JSON.stringify({ t: "talk", on: on }));
-    voiceHud();
-  }
-  function peerConn(id, initiator) {
-    var pc = new RTCPeerConnection({ iceServers: ICE });
-    var audio = new Audio(); audio.autoplay = true; audio.volume = cfg.voiceVolume / 100;
-    V.peers[id] = { pc: pc, audio: audio };
-    V.mic.getTracks().forEach(function (t) { pc.addTrack(t, V.mic); });
-    pc.ontrack = function (e) { audio.srcObject = e.streams[0]; audio.play().catch(function () {}); };
-    pc.onicecandidate = function (e) { if (e.candidate) signal(id, { ice: e.candidate }); };
-    pc.onconnectionstatechange = function () { if (pc.connectionState === "failed") dropPeer(id); };
-    if (initiator) pc.createOffer().then(function (o) { return pc.setLocalDescription(o); }).then(function () { signal(id, { sdp: pc.localDescription }); });
-    return V.peers[id];
-  }
-  function dropPeer(id) {
-    var p = V.peers[id]; if (!p) return;
-    try { p.pc.close(); } catch (e) {} p.audio.srcObject = null;
-    delete V.peers[id]; delete V.talking[id]; voiceHud();
-  }
-  function signal(to, data) { if (V.ws && V.ws.readyState === 1) V.ws.send(JSON.stringify({ t: "signal", to: to, data: data })); }
-  function onSignal(from, d) {
-    var p = V.peers[from] || peerConn(from, false), pc = p.pc;
-    if (d.sdp) {
-      pc.setRemoteDescription(d.sdp).then(function () {
-        if (d.sdp.type === "offer") return pc.createAnswer().then(function (a) { return pc.setLocalDescription(a); }).then(function () { signal(from, { sdp: pc.localDescription }); });
-      }).catch(function (e) { console.warn("Ladue voice:", e); });
-    } else if (d.ice) pc.addIceCandidate(d.ice).catch(function () {});
-  }
-  function voiceConnect() {
-    if (V.ws || !V.mic || !cfg.voice) return;
-    V.status = "Voice connecting..."; voiceHud();
-    var ws = V.ws = new WebSocket("wss://ladue.cc.cd/voice?name=" + encodeURIComponent(voiceName()));
-    ws.onopen = function () { V.retry = 0; toast("Joined Ladue voice" + (cfg.voiceMode === "ptt" ? " - hold " + keyName(cfg.voiceKey) + " to talk" : ""), 2500); voiceHud(); };
-    ws.onmessage = function (e) {
-      var m; try { m = JSON.parse(e.data); } catch (x) { return; }
-      if (m.t === "welcome") { V.me = m.id; m.peers.forEach(function (p) { V.names[p.id] = p.name; peerConn(p.id, true); }); }
-      else if (m.t === "join") V.names[m.id] = m.name;
-      else if (m.t === "leave") dropPeer(m.id);
-      else if (m.t === "signal") onSignal(m.from, m.data);
-      else if (m.t === "talk") V.talking[m.id] = m.on;
-      else if (m.t === "full") V.status = "Voice channel is full";
-      voiceHud();
-    };
-    ws.onclose = function () {
-      if (V.ws !== ws) return;
-      Object.keys(V.peers).forEach(dropPeer); V.ws = null;
-      if (!cfg.voice) return;
-      // back off: 3 s, 6 s, 12 s ... up to a minute
-      var wait = Math.min(60, 3 * Math.pow(2, V.retry++));
-      V.status = "Voice reconnecting in " + wait + "s"; voiceHud();
-      setTimeout(voiceConnect, wait * 1000);
-    };
-  }
-  function voiceStart() {
-    if (V.mic) return voiceConnect();
-    if (V.starting || V.denied) return;
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { V.denied = true; V.status = "Voice: no microphone access here"; voiceHud(); return; }
-    V.starting = true; V.status = "Voice: allow the microphone"; voiceHud();
-    navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } }).then(function (stream) {
-      V.starting = false;
-      if (!cfg.voice) { stream.getTracks().forEach(function (t) { t.stop(); }); return; }
-      V.mic = stream; setMic(cfg.voiceMode === "open");
-      voiceConnect();
-    }).catch(function () {
-      // ask only once; turning the mod off and on again asks again
-      V.starting = false; V.denied = true; V.status = "Voice: microphone blocked"; voiceHud();
-      toast("Microphone blocked. Allow it in the address bar, then turn Voice Chat off and on.", 6000);
-    });
-  }
-  function voiceStop() {
-    V.denied = false; V.retry = 0;
-    var ws = V.ws; V.ws = null; if (ws) try { ws.close(); } catch (e) {}
-    Object.keys(V.peers).forEach(dropPeer);
-    if (V.mic) V.mic.getTracks().forEach(function (t) { t.stop(); }); V.mic = null; V.status = "Voice off";
-  }
-  function voiceSync() {
-    if (cfg.voice) voiceStart(); else if (V.mic || V.ws || V.denied) voiceStop();
-    Object.keys(V.peers).forEach(function (id) { V.peers[id].audio.volume = cfg.voiceVolume / 100; });
-    if (V.mic && !V.held) setMic(cfg.voiceMode === "open");
-    voiceHud();
-  }
-  addEventListener("keydown", function (e) {
-    if (!voiceKeyHeld(e) || e.repeat || !inWorld()) return;
-    if (menu.classList.contains("open")) return;
-    V.held = true; setMic(true);
-  }, true);
-  addEventListener("keyup", function (e) { if (e.code === cfg.voiceKey && V.held) { V.held = false; if (cfg.voiceMode === "ptt") setMic(false); } }, true);
-  addEventListener("blur", function () { if (V.held) { V.held = false; if (cfg.voiceMode === "ptt") setMic(false); } });
-  setInterval(voiceSync, 2000);
-  pills.voice.textContent = "Voice off";
-
   /* ---------------- mod menu ---------------- */
   var MODS = [
     { id: "fps", name: "FPS Counter", cat: "HUD", desc: "Frames per second." },
@@ -435,9 +322,7 @@
       opts: [["customTextValue", "Text", "text"]] },
     { id: "breakReminder", name: "Break Reminder", cat: "Utility", desc: "Reminds you to take a break every few minutes.",
       opts: [["breakMinutes", "Minutes", "range", [10, 90, 5]]] },
-    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." },
-    { id: "voice", name: "Voice Chat", cat: "Utility", desc: "Talk with everyone on Ladue Client. Hold V to talk, or use open mic. Your browser asks for the microphone.",
-      opts: [["voiceMode", "Mode", "select", [["ptt", "Push to talk"], ["open", "Open mic"]]], ["voiceKey", "Talk key", "select", [["KeyV", "V"], ["KeyB", "B"], ["KeyG", "G"], ["CapsLock", "Caps Lock"], ["AltLeft", "Left Alt"]]], ["voiceVolume", "Volume", "range", [0, 100, 5]]] }
+    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." }
   ];
   var CATS = ["All", "HUD", "Visual", "Utility", "Cosmetics", "Settings"];
   function keyName(code) { return code.replace(/^Key/, "").replace("AltLeft", "Left Alt").replace("CapsLock", "Caps Lock"); }

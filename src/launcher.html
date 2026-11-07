@@ -357,6 +357,32 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .switch.on{background:#3a5fae}
 .switch{background:#1c2a4a}
 .swatches{display:flex;gap:.4rem;flex-wrap:wrap}
+#boot{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:radial-gradient(ellipse at center,#16306a 0%,#071026 70%);color:#fff;font-family:Inter,system-ui,sans-serif}#boot .boot-in{display:flex;flex-direction:column;align-items:center;gap:.6rem}#boot img{width:120px;height:120px;image-rendering:auto;filter:drop-shadow(0 8px 24px #0008)}#boot .boot-name{font-family:var(--px,monospace);font-size:2rem;letter-spacing:.2em}#boot .boot-ver{color:#9fb4e0;font-weight:700;letter-spacing:.1em}#boot .boot-bar{width:280px;height:6px;background:#ffffff1f;border-radius:3px;overflow:hidden;margin-top:.8rem}#boot .boot-bar i{display:block;height:100%;width:4%;background:#fff;border-radius:3px;transition:width .2s}#boot .boot-msg{color:#c9d6f2;font-size:.85rem}
+
+/* ---- launcher: client look ---- */
+#app .page[data-page=play].on{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:1.6rem;align-items:end}
+#app .side{background:#050b18b3;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#app .side button{border-radius:10px}
+#app .side button.on{background:linear-gradient(90deg,#1f3d7c,#1f3d7c55);box-shadow:inset 3px 0 0 #fff}
+#app .chip,#app .vcard,#app .btn,#app .mcard,#app input,#app select{border-radius:10px}
+#app .chip{background:#0b1428b3;backdrop-filter:blur(10px)}
+#app .vcard{background:#0b1428b3;backdrop-filter:blur(10px)}
+#app .vcard.on{border-color:#fff;box-shadow:0 0 0 1px #fff,0 10px 30px #1f3d7c88}
+#app .playbar{background:#050b18b3;backdrop-filter:blur(14px);border:1px solid #ffffff1a;border-radius:14px;padding:.8rem;gap:1rem}
+#app #playBtn{border-radius:10px;min-width:260px;background:linear-gradient(180deg,#2f5fbf,#1f3d7c);border:1px solid #ffffff55;box-shadow:0 10px 30px #1f3d7c88}
+#app #playBtn:hover{filter:brightness(1.12)}
+#app #status{color:#cfe0ff;font-weight:600}
+.playside{display:flex;flex-direction:column;gap:.9rem;padding-bottom:1rem}
+.pcard{background:#050b18b3;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid #ffffff1a;border-radius:14px;padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem}
+.pcard-h{display:flex;justify-content:space-between;align-items:center;font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:#9fb4e0}
+.sdot{width:9px;height:9px;border-radius:50%;background:#7a869c;box-shadow:0 0 0 3px #7a869c33}
+.sdot.on{background:#3ddc97;box-shadow:0 0 0 3px #3ddc9733}.sdot.off{background:#ff6b6b;box-shadow:0 0 0 3px #ff6b6b33}
+.srv-big{font-family:var(--px);font-size:1.35rem;color:#fff}
+.srv-row{display:flex;justify-content:space-between;font-size:.85rem;color:#a9b7d6}.srv-row b{color:#fff}
+.pbtn{width:100%;justify-content:center;border-radius:10px}
+.news{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.6rem}
+.news li{border-left:2px solid #fff;padding-left:.6rem}.news b{display:block;color:#fff;font-size:.9rem}.news small{color:#a9b7d6;font-size:.8rem;line-height:1.35}
+@media (max-width:900px){#app .page[data-page=play].on{grid-template-columns:1fr}.playside{padding-bottom:2rem}}
 </style>
 <script>window.LADUE_SITE_VERSION="dev";
 /* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
@@ -364,6 +390,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 (function(){
   var KEY="ladue.updateTried";
   async function check(){
+    if(/[?&]play=/.test(location.search)||!document.getElementById("app"))return; // never reload a running game
     if(document.getElementById("app")&&document.getElementById("app").classList.contains("open"))return; // never interrupt the launcher
     try{
       var r=await fetch("version.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)return;
@@ -403,12 +430,12 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
   <header class="hero" id="top">
     <div class="wrap">
       <div class="lockup"><img src="__LOGO__" alt=""><h1>LADUE</h1></div>
-      <p class="tagline">The Ladue Horton Watkins Minecraft client. Play 26.2 in your browser and join the Ladue server.</p>
+      <p class="tagline">The Ladue Horton Watkins Minecraft client. Play 26.3 in your browser and join the Ladue server.</p>
       <div class="row">
         <button class="btn primary big" data-launch><i data-ico="play"></i>Play now</button>
         <a class="btn big" href="#versions">Browse versions</a>
       </div>
-      <div class="meta"><span><b>5</b> versions</span><span><b>9</b> capes</span><span><b>21</b> mods</span><span>no install</span></div>
+      <div class="meta"><span><b>5</b> versions</span><span><b>9</b> capes</span><span><b>20</b> mods</span><span>no install</span></div>
     </div>
     <div class="hudfloat" aria-hidden="true">
       <div class="stack">
@@ -427,7 +454,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
   <div class="wrap">
     <section class="block" id="start">
       <div class="steps">
-        <div class="step reveal"><b>01</b><h3>Pick a version</h3><p>Five builds, from 1.5.2 up to 26.2. Each keeps its own worlds and settings. Each keeps its own worlds and settings.</p></div>
+        <div class="step reveal"><b>01</b><h3>Pick a version</h3><p>Five builds, from 1.5.2 up to 26.3. Each keeps its own worlds and settings.</p></div>
         <div class="step reveal"><b>02</b><h3>Set up your look</h3><p>Choose a cape and username in the launcher. They're applied the moment the game starts.</p></div>
         <div class="step reveal"><b>03</b><h3>Play</h3><p>Singleplayer offline, or join servers. Press RSHIFT any time for the mod menu.</p></div>
       </div>
@@ -435,21 +462,21 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 
     <section class="block" id="join">
       <div class="wrap">
-        <div class="sechead reveal"><div><h2 class="title">Join the Ladue server</h2><p class="sub">The Ladue Horton Watkins server runs Minecraft 26.2. Play from Java Edition or straight from this page.</p></div></div>
+        <div class="sechead reveal"><div><h2 class="title">Join the Ladue server</h2><p class="sub">The Ladue Horton Watkins server runs Minecraft 26.3. Play from Java Edition or straight from this page.</p></div></div>
         <div class="join reveal">
           <div class="jcard">
             <h3>ladue.cc.cd</h3>
             <div class="jstat">
               <div><b id="jStatus"><span class="jdot"></span>…</b><span>Status</span></div>
               <div><b id="jPlayers">–</b><span>Players</span></div>
-              <div><b>26.2</b><span>Version</span></div>
+              <div><b>26.3</b><span>Version</span></div>
             </div>
             <div class="jip"><code id="jIp">ladue.cc.cd</code><button class="btn primary" id="jCopy">Copy</button></div>
           </div>
           <div class="jcard">
             <h3>Play in your browser</h3>
             <ol class="jsteps">
-              <li><span>Press <b>Play</b> on Ladue 26.2 below.</span></li>
+              <li><span>Press <b>Play</b> on Ladue 26.3 below.</span></li>
               <li><span>Open <b>Multiplayer</b>. <b>Ladue</b> is already in your server list.</span></li>
               <li><span>Double-click <b>Ladue</b> to join. Press <b>Right Shift</b> in game for mods.</span></li>
               <li><span>On Java Edition instead? Add <code>ladue.cc.cd</code> as a server.</span></li>
@@ -457,16 +484,16 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
           </div>
           <div class="jcard">
             <h3>Ladue resource pack</h3>
-            <p class="sub" style="margin:0 0 1rem">Built into Ladue 26.2 and turned on automatically: a Ladue blue title screen with the LHWHS crest and Ladue splash texts. Download it for Java Edition.</p>
+            <p class="sub" style="margin:0 0 1rem">Built into Ladue 26.3 and turned on automatically: a Ladue blue title screen with the LHWHS crest and Ladue splash texts. Download it for Java Edition.</p>
             <a class="btn primary" href="ladue-resource-pack.zip" download><i data-ico="save"></i>Download pack</a>
-            <p class="sub" style="margin-top:.9rem;font-size:.85rem">Java Edition: put the zip in your resourcepacks folder. In Ladue 26.2 you can switch it off under Options, Resource Packs.</p>
+            <p class="sub" style="margin-top:.9rem;font-size:.85rem">Java Edition: put the zip in your resourcepacks folder. In Ladue 26.3 you can switch it off under Options, Resource Packs.</p>
           </div>
         </div>
       </div>
     </section>
     <section class="block" id="versions">
       <div class="sechead">
-        <div><h2 class="title">Versions</h2><p class="sub">26.2 is the same version as the Ladue server.</p></div>
+        <div><h2 class="title">Versions</h2><p class="sub">26.3 is the same version as the Ladue server.</p></div>
       </div>
       <div class="vtable reveal" id="siteVersions"></div>
     </section>
@@ -588,6 +615,30 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
             <span id="status"></span>
           </div>
         </div>
+      
+        <aside class="playside">
+          <div class="pcard">
+            <div class="pcard-h"><span>Ladue Server</span><span class="sdot" id="srvDot"></span></div>
+            <div class="srv-big" id="srvPlayers">Checking...</div>
+            <div class="srv-row"><span>Version</span><b>26.3</b></div>
+            <div class="srv-row"><span>Address</span><b>ladue.cc.cd</b></div>
+            <button class="btn primary pbtn" id="srvPlay"><i data-ico="play"></i>Play on Ladue</button>
+            <button class="btn pbtn" id="srvCopy">Copy address</button>
+          </div>
+          <div class="pcard">
+            <div class="pcard-h"><span>What's new</span></div>
+            <ul class="news">
+              <li><b>Minecraft 26.3</b><small>Ladue Client and the server are on 26.3.</small></li>
+              <li><b>Own game tab</b><small>Play opens the game in a new tab, so the launcher stays open.</small></li>
+              <li><b>New mod menu</b><small>Press Right Shift in game. HUD only shows while you play.</small></li>
+            </ul>
+          </div>
+          <div class="pcard tips"><div class="pcard-h"><span>Keys</span></div>
+            <div class="srv-row"><span>Mod menu</span><b class="kbd">RSHIFT</b></div>
+            <div class="srv-row"><span>Hide HUD</span><b class="kbd">F4</b></div>
+            <div class="srv-row"><span>Zoom</span><b class="kbd">C</b></div>
+          </div>
+        </aside>
       </section>
 
       <section class="page" data-page="cosmetics">
@@ -668,7 +719,7 @@ const load=(k,d)=>{try{return Object.assign({},d,JSON.parse(localStorage.getItem
 let save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 
 const VERSIONS=[
-  {id:"v262",name:"26.2",full:"Ladue 26.2",desc:"Newest Minecraft. Ladue server is already in Multiplayer",tag:["Latest","purple"],theme:false,cos:false},
+  {id:"v263",name:"26.3",full:"Ladue 26.3",desc:"Newest Minecraft. Ladue server is already in Multiplayer",tag:["Latest","purple"],theme:false,cos:true},
   {id:"v18",name:"1.8.8",full:"Ladue 1.8.8",desc:"Most stable, best for PvP and servers",tag:["Recommended","green"],theme:true,cos:true},
   {id:"v18w",name:"1.8.8 WASM",full:"Ladue 1.8.8 WASM-GC",desc:"Same game, faster on new Chrome/Edge",tag:["Fastest","purple"],theme:true,cos:true},
   {id:"v112",name:"1.12.2",full:"Ladue 1.12.2",desc:"Newer blocks and mobs, early development",tag:["Older",""],theme:true,cos:true},
@@ -799,9 +850,7 @@ const MODDEFS=[
       opts: [["customTextValue", "Text", "text"]] },
     { id: "breakReminder", name: "Break Reminder", cat: "Utility", desc: "Reminds you to take a break every few minutes.",
       opts: [["breakMinutes", "Minutes", "range", [10, 90, 5]]] },
-    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." },
-    { id: "voice", name: "Voice Chat", cat: "Utility", desc: "Talk with everyone on Ladue Client. Hold V to talk, or use open mic. Your browser asks for the microphone.",
-      opts: [["voiceMode", "Mode", "select", [["ptt", "Push to talk"], ["open", "Open mic"]]], ["voiceKey", "Talk key", "select", [["KeyV", "V"], ["KeyB", "B"], ["KeyG", "G"], ["CapsLock", "Caps Lock"], ["AltLeft", "Left Alt"]]], ["voiceVolume", "Volume", "range", [0, 100, 5]]] }
+    { id: "hideHudKey", name: "Hide HUD (F4)", cat: "Utility", desc: "Press F4 to hide or show every overlay at once." }
   ];
 const MOD_DEFAULTS={
     fps: true, cps: true, keystrokes: true, clock: false, session: false, memory: false, battery: false,
@@ -810,7 +859,6 @@ const MOD_DEFAULTS={
     afk: false, afkMinutes: 5, titleFlash: false,
     ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
     breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
-    voice: false, voiceMode: "ptt", voiceKey: "KeyV", voiceVolume: 100,
     hudColor: "#ffffff", hudBg: 60, hudScale: 100, menuButton: true
   };
 const mods=Object.assign({},MOD_DEFAULTS,load("astra.mods",{}));
@@ -854,20 +902,47 @@ $("#modReset").onclick=()=>{Object.keys(mods).forEach(k=>delete mods[k]);Object.
 $("#resetBtn").onclick=()=>{["astra.cosmetics","astra.mods","astra.settings"].forEach(k=>localStorage.removeItem(k));location.reload()};
 
 /* ---------- launch ---------- */
+// Play opens the game in its own tab (index.html?play=<id>), so the launcher stays open.
 const status=$("#status");
+async function launch(v,say){
+  if(v.theme&&sets.theme&&GAMES[v.id])try{await installPack(v.id)}catch(e){console.warn("Astra: pack install failed",e)}
+  if(v.cos)await applyCosmetics(v.id,cos);
+  if(v.id==="v263")try{await installLaduePack()}catch(e){console.warn("Ladue: pack install failed",e)}
+  say("Loading "+v.name+"...");
+  const html=await unpack(v.id,p=>say("Downloading "+v.name+"... "+p+"%"));
+  // replace the page with the game so it runs top-level (gamepad, storage, pointer lock work)
+  document.open();document.write(html);document.close();
+}
 $("#playBtn").onclick=async()=>{
   const v=VERSIONS.find(x=>x.id===sets.version);
+  const tab=window.open(location.pathname+"?play="+encodeURIComponent(v.id),"_blank");
+  if(tab){status.textContent=v.full+" opened in a new tab.";return}
+  // popup blocked: start it here instead
   $("#playBtn").disabled=true;status.textContent="Preparing "+v.name+"...";
-  try{
-    if(v.theme&&sets.theme&&GAMES[v.id])try{await installPack(v.id)}catch(e){console.warn("Astra: pack install failed",e)}
-    if(v.cos)await applyCosmetics(v.id,cos);
-    if(v.id==="v262")try{await installLaduePack()}catch(e){console.warn("Ladue: pack install failed",e)}
-    status.textContent="Loading "+v.name+"...";
-    const html=await unpack(v.id,p=>status.textContent="Downloading "+v.name+"... "+p+"%");
-    // replace this page with the game so it runs top-level (gamepad, storage, pointer lock work)
-    document.open();document.write(html);document.close();
-  }catch(e){status.textContent="Failed to launch: "+e;$("#playBtn").disabled=false}
+  try{await launch(v,t=>status.textContent=t)}catch(e){status.textContent="Failed to launch: "+e;$("#playBtn").disabled=false}
 };
+{
+  const id=new URLSearchParams(location.search).get("play"),v=id&&VERSIONS.find(x=>x.id===id);
+  if(v){
+    const boot=document.createElement("div");boot.id="boot";
+    boot.innerHTML='<div class="boot-in"><img src="src/pack/logo_clear.png" alt=""><div class="boot-name">LADUE CLIENT</div><div class="boot-ver">'+v.name+'</div><div class="boot-bar"><i></i></div><div class="boot-msg">Preparing...</div></div>';
+    document.body.appendChild(boot);document.title="Ladue Client "+v.name;
+    const msg=boot.querySelector(".boot-msg"),bar=boot.querySelector(".boot-bar i");
+    launch(v,t=>{msg.textContent=t;const p=/(d+)%/.exec(t);if(p)bar.style.width=p[1]+"%"}).catch(e=>{msg.textContent="Failed to launch: "+e});
+  }
+}
+
+
+/* ---------- launcher: Ladue server card ---------- */
+(function(){
+  const dot=$("#srvDot"),out=$("#srvPlayers");if(!dot)return;
+  function check(){fetch("https://api.mcsrvstat.us/3/ladue.cc.cd").then(r=>r.json()).then(d=>{
+    if(d.online&&d.players){dot.className="sdot on";out.textContent=d.players.online+" / "+d.players.max+" online"}
+    else{dot.className="sdot off";out.textContent="Offline"}}).catch(()=>{out.textContent="Status unavailable"})}
+  check();setInterval(check,60000);
+  $("#srvPlay").onclick=()=>{sets.version="v263";save("astra.settings",sets);renderVersions();$("#playBtn").click()};
+  $("#srvCopy").onclick=()=>{navigator.clipboard.writeText("ladue.cc.cd").then(()=>{$("#srvCopy").textContent="Copied!";setTimeout(()=>$("#srvCopy").textContent="Copy address",1500)})};
+})();
 
 /* ---------- custom pixel icons ---------- */
 const ICONS={

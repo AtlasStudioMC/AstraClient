@@ -10,8 +10,8 @@ __pycache__
 server-plugin/target
 games/
 
-# hosted 26.2 build (served by GitHub Pages)
+# hosted 26.3 build (served by GitHub Pages)
 !games/
 games/*
-!games/v262.bin
+!games/v263.bin
 !games/ladue-pack.json

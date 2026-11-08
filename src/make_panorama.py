@@ -188,6 +188,36 @@ def star_at(face, i, j, el, az):
     fade = 1.0 - 0.75 * math.exp(-(angdiff(az, SUN_AZ) / 40.0) ** 2) * max(0.0, 1 - el / 40.0)
     return col, (0.35 + 0.65 * b) * fade, b > 0.93
 
+# ---------------------------------------------------------------- school crest + aurora
+CREST = (38.0, 15.0, 9.0)   # azimuth, elevation of the centre, angular half-size (degrees)
+_crest = Image.open(pathlib.Path(__file__).resolve().parent / "pack/logo_clear.png").convert("RGBA")
+_crest_px = _crest.load()
+
+def crest_at(az, el):
+    caz, cel, half = CREST
+    lx = angdiff(az, caz) / half
+    ly = (cel - el) / half
+    r2 = lx * lx + ly * ly
+    glow = max(0.0, 1.0 - r2 / 2.6) ** 2 * 0.55
+    if abs(lx) <= 1 and abs(ly) <= 1:
+        u = int((lx + 1) / 2 * (_crest.width - 1)); v = int((ly + 1) / 2 * (_crest.height - 1))
+        c = _crest_px[u, v]
+        if c[3] > 40:
+            return (c[0], c[1], c[2]), c[3] / 255.0, glow
+    return None, 0.0, glow
+
+def aurora_at(az, el):
+    if not (16.0 < el < 62.0): return None, 0.0
+    a = math.radians(az)
+    wave = 32.0 + 9.0 * math.sin(a * 2.0 + 0.6) + 5.0 * math.sin(a * 5.0 + 1.7)
+    d = abs(el - wave)
+    if d > 7.0: return None, 0.0
+    n = fbm(math.cos(a) * 4.0, math.sin(a) * 4.0, el * 0.08, 3, 91)
+    strength = (1.0 - d / 7.0) ** 1.5 * max(0.0, n - 0.38) * 2.2
+    if strength <= 0.02: return None, 0.0
+    col = mix((90, 170, 255), (190, 230, 255), (el - wave + 7.0) / 14.0)
+    return col, min(0.55, strength)
+
 # ---------------------------------------------------------------- dithering
 BAYER = [[0, 8, 2, 10], [12, 4, 14, 6], [3, 11, 1, 9], [15, 7, 13, 5]]
 STEP = 9.0
@@ -224,6 +254,14 @@ def render_face(face):
                 if s:
                     col = mix(col, s[0], s[1])
                     if s[2]: bright.append((i, j, s[0]))
+                ac, aw = aurora_at(az, el)
+                if ac is not None:
+                    col = mix(col, ac, aw)
+                cc, cw, cg = crest_at(az, el)
+                if cg > 0:
+                    col = mix(col, (120, 160, 240), cg)
+                if cc is not None:
+                    col = mix(col, cc, cw)
                 m, w = moon_at(az, el, d)
                 if m is not None:
                     col = m if w >= 1.0 else mix(col, m, w)

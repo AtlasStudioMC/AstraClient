@@ -173,7 +173,7 @@ async function installLaduePack(){
   const db=await new Promise((ok,no)=>{const r=indexedDB.open(LADUE_DB,1);
     r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('filesystem'))r.result.createObjectStore('filesystem',{keyPath:['path']})};
     r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)});
-  const files=await (await fetch('games/ladue-pack.json?v=6c6e428143',{cache:'no-cache'})).json();
+  const files=await (await fetch('games/ladue-pack.json?v=5bdcdf904e',{cache:'no-cache'})).json();
   await new Promise((ok,no)=>{const tx=db.transaction('filesystem','readwrite'),st=tx.objectStore('filesystem');
     const put=(path,bytes)=>st.put({path,data:bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength)});
     put('resourcepacks/.eaglerfsdir',new Uint8Array(0));

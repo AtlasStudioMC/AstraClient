@@ -1,40 +1,15 @@
 # Builds "Ladue Client" resource pack for Minecraft 26.2: title-screen panorama, pack icon, splashes.
-import io, json, sys, zipfile, pathlib
+import io, json, re, sys, zipfile, pathlib
 from PIL import Image, ImageEnhance, ImageOps, ImageDraw, ImageFilter
 root = pathlib.Path(sys.argv[1])            # AstraClient repo
 out = root / "ladue-resource-pack.zip"
 NAVY = (31, 61, 124)
 S = 1024
 
-hero = Image.open(root / "src/pack/web_hero.jpg").convert("RGB")
-# A seamless strip: the art, then its mirror, so the panorama loops with no seam.
-strip = Image.new("RGB", (hero.width * 2, hero.height))
-strip.paste(hero, (0, 0)); strip.paste(ImageOps.mirror(hero), (hero.width, 0))
-strip = strip.resize((S * 4, S), Image.LANCZOS)
-# Pull it toward Ladue navy and white.
-strip = ImageEnhance.Color(strip).enhance(0.92)
-tint = Image.new("RGB", strip.size, NAVY)
-strip = Image.blend(strip, tint, 0.18)
-strip = ImageEnhance.Contrast(strip).enhance(1.12)
-strip = ImageEnhance.Brightness(strip).enhance(0.96)
-
-faces = {}
-for i in range(4):                         # 0 front, 1 right, 2 back, 3 left
-    faces[i] = strip.crop((i * S, 0, (i + 1) * S, S))
-top_color = strip.crop((0, 0, S * 4, 8)).resize((1, 1), Image.LANCZOS).getpixel((0, 0))
-bottom_color = strip.crop((0, S - 8, S * 4, S)).resize((1, 1), Image.LANCZOS).getpixel((0, 0))
-faces[4] = Image.new("RGB", (S, S), top_color).filter(ImageFilter.GaussianBlur(2))
-faces[5] = Image.new("RGB", (S, S), bottom_color)
-
-# Clear Ladue crest on the back face, with a soft navy glow so it reads over the sky.
-crest = Image.open(root / "src/pack/logo_clear.png").convert("RGBA").resize((340, 340), Image.LANCZOS)
-glow = Image.new("RGBA", (S, S), (0, 0, 0, 0))
-halo = Image.new("L", (S, S), 0); ImageDraw.Draw(halo).ellipse((S//2 - 230, S//2 - 230, S//2 + 230, S//2 + 230), fill=120)
-halo = halo.filter(ImageFilter.GaussianBlur(60))
-glow.paste(Image.new("RGBA", (S, S), (12, 30, 80, 255)), (0, 0), halo)
-back = faces[2].convert("RGBA"); back.alpha_composite(glow)
-back.alpha_composite(crest, (S // 2 - 170, S // 2 - 170))
-faces[2] = back.convert("RGB")
+# Seamless 360 degree pixel-art sky with floating islands over a sea of clouds (see make_panorama.py).
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+from make_panorama import render_faces
+faces = render_faces()
 
 icon = Image.open(root / "src/pack/logo_clear.png").convert("RGBA").resize((128, 128), Image.LANCZOS)
 splashes = "\n".join([
@@ -55,5 +30,18 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
     for i, f in faces.items():
         z.writestr(f"assets/minecraft/textures/gui/title/background/panorama_{i}.png", png(f))
     z.writestr("assets/minecraft/texts/splashes.txt", splashes)
-faces[2].resize((512, 512)).save(root.resolve().parent / "_rp/preview_back.png")
 print(out, out.stat().st_size // 1024, "KB")
+
+# The launcher installs the pack from games/ladue-pack.json (file name -> base64) and finds it
+# through a cache-busting hash in index.html and src/engine.js.
+import base64, hashlib
+with zipfile.ZipFile(out) as z:
+    pack = {n: base64.b64encode(z.read(n)).decode() for n in z.namelist()}
+data = json.dumps(pack, separators=(",", ":")).encode()
+(root / "games/ladue-pack.json").write_bytes(data)
+h = hashlib.sha1(data).hexdigest()[:10]
+for f in ("index.html", "src/engine.js"):
+    p = root / f
+    b = re.sub(rb"games/ladue-pack\.json\?v=[0-9a-f]+", b"games/ladue-pack.json?v=" + h.encode(), p.read_bytes())
+    p.write_bytes(b)
+print("games/ladue-pack.json", len(data) // 1024, "KB, v=" + h)

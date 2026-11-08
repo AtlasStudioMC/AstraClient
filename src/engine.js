@@ -14,7 +14,7 @@ async function unpack(id,onProgress){
     })()}});
   }else{
     // hosted build: download the gzipped game file
-    const res=await fetch('games/'+id+'.bin?v=6e2bb149c3',{cache:'no-cache'});
+    const res=await fetch('games/'+id+'.bin?v=cfd9fd2191',{cache:'no-cache'});
     if(!res.ok)throw new Error('could not download game ('+res.status+')');
     const total=+res.headers.get('content-length')||0;let got=0;
     const reader=res.body.getReader();
@@ -88,7 +88,7 @@ async function enablePack(lsKey){
 }
 
 // ---- cosmetics: write username + cape straight into the Eaglercraft profile (NBT in localStorage) ----
-const PROFILE_KEYS={v263:'_eaglercraftX.p',v18:'_eaglercraftX.p',v18w:'_eaglercraftX.p',v112:'_eaglercraft_1.12.p'};
+const PROFILE_KEYS={v262:'_eaglercraftX.p',v18:'_eaglercraftX.p',v18w:'_eaglercraftX.p',v112:'_eaglercraft_1.12.p'};
 function nbtRead(bytes){
   const dv=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);let p=0;const dec=new TextDecoder();
   const str=()=>{const n=dv.getUint16(p);p+=2;const s=dec.decode(bytes.subarray(p,p+n));p+=n;return s};

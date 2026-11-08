@@ -13,5 +13,5 @@ games/
 # hosted 26.3 build (served by GitHub Pages)
 !games/
 games/*
-!games/v263.bin
+!games/v262.bin
 !games/ladue-pack.json

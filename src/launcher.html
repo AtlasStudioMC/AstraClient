@@ -992,7 +992,7 @@ function paintIcons(root){(root||document).querySelectorAll("i[data-ico]:not([da
 new MutationObserver(()=>paintIcons()).observe(document.body,{childList:true,subtree:true});
 
 /* ---------- accounts + cloud presets ---------- */
-const API=location.protocol.startsWith("http")?"/api":null; // no accounts in the offline file
+const API=location.protocol.startsWith("http")?"https://accounts.ladue.cc.cd":null; // accounts live on their own Worker (ladue-accounts)
 let syncTimer=null,mode="login";
 async function api(path,opts={}){
   const res=await fetch(API+path,{...opts,headers:{"content-type":"application/json",...(session.token?{authorization:"Bearer "+session.token}:{})}});

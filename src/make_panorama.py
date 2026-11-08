@@ -5,8 +5,8 @@
 import math, pathlib, sys
 from PIL import Image
 
-N = 256          # logical pixels per face (each one becomes a 4x4 block: chunky, Minecraft-like)
-SCALE = 4
+N = 512          # logical pixels per face (each one becomes a 2x2 block)
+SCALE = 2
 
 # ---------------------------------------------------------------- noise
 def _h(ix, iy, iz, seed=0):
@@ -237,7 +237,37 @@ def direction(face, u, v):
     l = math.sqrt(d[0] ** 2 + d[1] ** 2 + d[2] ** 2)
     return (d[0] / l, d[1] / l, d[2] / l)
 
+# Plain Ladue look (what the user asked for): school-blue sky with the crest, nothing else.
+BLUE_ONLY = True
+BLUE = [(-90, (8, 18, 46)), (-25, (16, 38, 92)), (0, (44, 92, 186)), (12, (31, 66, 150)), (40, (20, 44, 108)), (90, (10, 22, 58))]
+CRESTS = [(az, 6.0, 8.5) for az in range(0, 360, 60)]
+
+def blue_face(face):
+    img = Image.new("RGB", (N, N))
+    px = img.load()
+    for j in range(N):
+        for i in range(N):
+            d = direction(face, (i + 0.5) / N, (j + 0.5) / N)
+            el = math.degrees(math.asin(max(-1.0, min(1.0, d[1]))))
+            az = math.degrees(math.atan2(d[0], d[2]))
+            col = ramp(BLUE, el)
+            for (caz, cel, half) in CRESTS:
+                lx = angdiff(az, caz) / half
+                ly = (cel - el) / half
+                if abs(lx) > 1.8 or abs(ly) > 1.8:
+                    continue
+                g = max(0.0, 1.0 - (lx * lx + ly * ly) / 3.0) ** 2 * 0.45
+                col = mix(col, (96, 150, 240), g)
+                if abs(lx) <= 1 and abs(ly) <= 1:
+                    c = _crest_px[int((lx + 1) / 2 * (_crest.width - 1)), int((ly + 1) / 2 * (_crest.height - 1))]
+                    if c[3] > 40:
+                        col = mix(col, c[:3], c[3] / 255.0)
+            px[i, j] = dither(col, i, j)
+    return img.resize((N * SCALE, N * SCALE), Image.NEAREST)
+
 def render_face(face):
+    if BLUE_ONLY:
+        return blue_face(face)
     img = Image.new("RGB", (N, N))
     px = img.load()
     bright = []

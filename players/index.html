@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ladue Player History</title>
+<meta name="description" content="How many people have been on the Ladue Minecraft server over time.">
+<style>
+  :root { color-scheme: dark; --bg:#050b18; --card:#0b1424; --line:#ffffff14; --text:#e8eefc; --dim:#8a9bb8; --blue:#6ea8ff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
+  .bar { min-height: 48px; display: flex; align-items: center; padding: 8px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
+  .bar b { font-weight: 800; }
+  .bar a { margin-left: auto; color: #8fb4ff; text-decoration: none; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 40px; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat span { display: block; color: var(--dim); font-size: 13px; }
+  .stat b { display: block; font-size: 28px; font-variant-numeric: tabular-nums; }
+  .stat small { color: var(--dim); }
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+  h1 { font-size: 18px; margin: 0; }
+  .ranges { margin-left: auto; display: flex; gap: 6px; }
+  button { background: transparent; color: var(--dim); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font: inherit; cursor: pointer; }
+  button.on { background: var(--blue); border-color: var(--blue); color: #06122a; font-weight: 700; }
+  #wrap { position: relative; }
+  svg { display: block; width: 100%; height: 320px; }
+  #tip { position: absolute; display: none; pointer-events: none; background: #162338; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; white-space: nowrap; transform: translate(-50%, -115%); }
+  .note { color: var(--dim); font-size: 13px; margin: 12px 0 0; }
+  @media (max-width: 560px) { .stat b { font-size: 22px; } .stat { padding: 10px 12px; } svg { height: 240px; } }
+</style>
+</head>
+<body>
+  <div class="bar"><b>Ladue Player History</b><a href="/">Back to Ladue Client</a></div>
+  <main>
+    <div class="stats">
+      <div class="stat"><span>Online now</span><b id="now">–</b></div>
+      <div class="stat"><span>Peak in this view</span><b id="peak">–</b><small id="peakWhen"></small></div>
+      <div class="stat"><span>Average in this view</span><b id="avg">–</b></div>
+    </div>
+    <div class="panel">
+      <div class="head">
+        <h1>Players online</h1>
+        <div class="ranges">
+          <button data-h="24">24 hours</button>
+          <button data-h="168">7 days</button>
+          <button data-h="0" class="on">All time</button>
+        </div>
+      </div>
+      <div id="wrap"><svg id="chart" role="img" aria-label="Players online over time"></svg><div id="tip"></div></div>
+      <p class="note">History starts October 29, rebuilt from server logs as the most players on in each hour. New data is recorded every 5 minutes.</p>
+    </div>
+  </main>
+<script>
+const API = "https://map.ladue.cc.cd";
+const svg = document.getElementById("chart"), tip = document.getElementById("tip");
+let samples = [], range = 0, points = [];
+const fmt = (t, opts) => new Date(t).toLocaleString([], opts);
+const full = { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" };
+
+function buckets() {
+  const end = Date.now(), first = samples.length ? samples[0][0] : end;
+  const start = range ? end - range * 3600e3 : first;
+  const step = range === 24 ? 15 * 60e3 : range === 168 ? 3600e3 : 3 * 3600e3;
+  const out = [], s0 = Math.floor(start / step) * step;
+  for (let t = s0; t <= end; t += step) out.push({ t, n: 0 });
+  for (const [t, n] of samples) {
+    if (t < s0) continue;
+    const b = out[Math.floor((t - s0) / step)];
+    if (b && n > b.n) b.n = n;
+  }
+  return out;
+}
+
+function draw() {
+  points = buckets();
+  const W = svg.clientWidth || 900, H = svg.clientHeight || 320, L = 34, R = 8, T = 10, B = 26;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const max = Math.max(5, ...points.map(p => p.n)), top = Math.ceil(max / 5) * 5;
+  const x = i => L + (W - L - R) * (points.length < 2 ? 0 : i / (points.length - 1));
+  const y = n => T + (H - T - B) * (1 - n / top);
+  let g = "";
+  for (let v = 0; v <= top; v += top / 5) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#ffffff14"/><text x="${L - 6}" y="${y(v) + 4}" fill="#8a9bb8" font-size="11" text-anchor="end">${v}</text>`;
+  const labels = W < 500 ? 3 : 6;
+  for (let k = 0; k <= labels; k++) {
+    const i = Math.round((points.length - 1) * k / labels);
+    const o = range === 24 ? { hour: "numeric" } : { month: "short", day: "numeric" };
+    g += `<text x="${x(i)}" y="${H - 8}" fill="#8a9bb8" font-size="11" text-anchor="${k === 0 ? "start" : k === labels ? "end" : "middle"}">${fmt(points[i].t, o)}</text>`;
+  }
+  const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(p.n).toFixed(1)}`).join("");
+  const area = `${line}L${x(points.length - 1)} ${y(0)}L${x(0)} ${y(0)}Z`;
+  svg.innerHTML = `${g}<path d="${area}" fill="#6ea8ff33"/><path d="${line}" fill="none" stroke="#6ea8ff" stroke-width="2" stroke-linejoin="round"/><circle id="dot" r="4" fill="#6ea8ff" visibility="hidden"/>`;
+  svg._x = x; svg._y = y; svg._L = L; svg._R = R; svg._W = W;
+  const peak = points.reduce((a, b) => b.n > a.n ? b : a, points[0]);
+  document.getElementById("peak").textContent = peak.n;
+  document.getElementById("peakWhen").textContent = peak.n ? fmt(peak.t, full) : "";
+  document.getElementById("avg").textContent = (points.reduce((a, b) => a + b.n, 0) / points.length).toFixed(1);
+}
+
+svg.addEventListener("pointermove", e => {
+  if (!points.length) return;
+  const box = svg.getBoundingClientRect(), mx = (e.clientX - box.left) * svg._W / box.width;
+  const i = Math.max(0, Math.min(points.length - 1, Math.round((mx - svg._L) / (svg._W - svg._L - svg._R) * (points.length - 1))));
+  const p = points[i], dot = document.getElementById("dot");
+  dot.setAttribute("cx", svg._x(i)); dot.setAttribute("cy", svg._y(p.n)); dot.setAttribute("visibility", "visible");
+  tip.textContent = `${p.n} player${p.n === 1 ? "" : "s"} · ${fmt(p.t, full)}`;
+  tip.style.display = "block";
+  tip.style.left = Math.max(90, Math.min(box.width - 90, svg._x(i) * box.width / svg._W)) + "px";
+  tip.style.top = svg._y(p.n) * box.height / svg.clientHeight + "px";
+});
+svg.addEventListener("pointerleave", () => { tip.style.display = "none"; const d = document.getElementById("dot"); if (d) d.setAttribute("visibility", "hidden"); });
+
+document.querySelectorAll("[data-h]").forEach(b => b.onclick = () => {
+  document.querySelectorAll("[data-h]").forEach(o => o.classList.toggle("on", o === b));
+  range = +b.dataset.h; draw();
+});
+addEventListener("resize", draw);
+
+function status() {
+  fetch(API + "/status").then(r => r.json()).then(d => {
+    document.getElementById("now").textContent = d.online ? d.players.online + " / " + d.players.max : "Offline";
+  }).catch(() => { document.getElementById("now").textContent = "?"; });
+}
+function history() {
+  fetch(API + "/stats/history").then(r => r.json()).then(d => { samples = d.samples; draw(); }).catch(() => {});
+}
+status(); history();
+setInterval(status, 30000); setInterval(history, 300000);
+</script>
+</body>
+</html>

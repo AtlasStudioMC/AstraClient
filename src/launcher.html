@@ -678,7 +678,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 
       <section class="page" data-page="map">
         <h2>Live map</h2>
-        <p class="sub">The Ladue server world from above. It updates as people build, and online players show up live. <a href="/map/" target="_blank" rel="noopener">Open it full screen</a></p>
+        <p class="sub">The Ladue server world from above. It updates as people build, and online players show up live. <a href="/map/" target="_blank" rel="noopener">Open it full screen</a> · <a href="/players/" target="_blank" rel="noopener">Player history</a></p>
         <div class="mapframe"><iframe id="mapFrame" title="Ladue live map" referrerpolicy="no-referrer"></iframe></div>
       </section>
 
@@ -755,7 +755,7 @@ async function drawCape(canvas,cape){
 (function(){
   const c=document.getElementById("jCopy");if(!c)return;
   c.onclick=async()=>{try{await navigator.clipboard.writeText("ladue.cc.cd");c.textContent="Copied!"}catch(e){c.textContent="ladue.cc.cd"}setTimeout(()=>c.textContent="Copy",1500)};
-  fetch("https://api.mcsrvstat.us/3/ladue.cc.cd").then(r=>r.json()).then(d=>{
+  fetch("https://map.ladue.cc.cd/status").then(r=>r.json()).then(d=>{
     document.getElementById("jStatus").innerHTML=`<span class="jdot ${d.online?"on":"off"}"></span>${d.online?"Online":"Offline"}`;
     if(d.online&&d.players)document.getElementById("jPlayers").textContent=d.players.online+"/"+d.players.max;
   }).catch(()=>{});
@@ -948,7 +948,7 @@ $("#playBtn").onclick=async()=>{
 /* ---------- launcher: Ladue server card ---------- */
 (function(){
   const dot=$("#srvDot"),out=$("#srvPlayers");if(!dot)return;
-  function check(){fetch("https://api.mcsrvstat.us/3/ladue.cc.cd").then(r=>r.json()).then(d=>{
+  function check(){fetch("https://map.ladue.cc.cd/status").then(r=>r.json()).then(d=>{
     if(d.online&&d.players){dot.className="sdot on";out.textContent=d.players.online+" / "+d.players.max+" online"}
     else{dot.className="sdot off";out.textContent="Offline"}}).catch(()=>{out.textContent="Status unavailable"})}
   check();setInterval(check,60000);

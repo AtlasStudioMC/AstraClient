@@ -192,7 +192,7 @@
   }
   function checkPlayers() {
     if (!cfg.players || document.hidden) return;
-    fetch("https://api.mcsrvstat.us/3/ladue.cc.cd").then(function (r) { return r.json(); }).then(function (d) {
+    fetch("https://map.ladue.cc.cd/status").then(function (r) { return r.json(); }).then(function (d) {
       pills.players.textContent = d.online && d.players ? "Ladue " + d.players.online + "/" + d.players.max + " online" : "Ladue offline";
     }).catch(function () {});
   }

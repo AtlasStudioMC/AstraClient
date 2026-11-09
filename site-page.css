@@ -1,0 +1,35 @@
+/* Shared look for the standalone pages (/map/, /players/). Values match the main site's theme in src/launcher.html. */
+@import url("https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap");
+
+:root {
+  color-scheme: dark;
+  --bg: #071026; --panel: #0c1838; --panel2: #11214a; --line: #1c3266; --line2: #2a4686;
+  --text: #f3f6fc; --muted: #a9b7d6; --accent: #fff; --navy: #1f3d7c; --navy-lt: #3a5fae;
+  --px: "Silkscreen", "Courier New", monospace;
+  --ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { min-height: 100%; background: var(--bg); color: var(--text); font-family: var(--ui); }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+
+nav.top { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 1.6rem; padding: .6rem clamp(14px, 3vw, 28px); background: #060d22ee; backdrop-filter: blur(8px); border-bottom: 2px solid #fff2; }
+.brand { font-family: var(--px); font-weight: 700; font-size: 1.25rem; color: #fff; letter-spacing: .04em; display: flex; align-items: center; gap: .5rem; flex: none; }
+.brand img { width: 1.6em; height: 1.6em; object-fit: contain; }
+.navlinks { display: flex; gap: 1.1rem; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.navlinks::-webkit-scrollbar { display: none; }
+.navlinks a { color: var(--muted); font-weight: 600; font-size: .9rem; padding: .35rem 0; border-bottom: 2px solid transparent; white-space: nowrap; }
+.navlinks a:hover { color: var(--text); }
+.navlinks a.active { color: #fff; border-bottom-color: var(--accent); }
+.navright { margin-left: auto; flex: none; }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; padding: .45rem .85rem; font-size: .88rem; font-weight: 700; background: #13254f; border: 2px solid #050b1c; box-shadow: inset 0 -3px 0 #0a1636, inset 0 2px 0 #284387; transition: background .1s; }
+.btn:hover { background: #1a3166; }
+.btn:active { box-shadow: inset 0 3px 0 #0a1636; }
+.btn.primary, .btn.on { background: var(--navy); color: #fff; border-color: #fff; box-shadow: inset 0 -3px 0 #132857, inset 0 2px 0 #4a6cbd; }
+.btn.primary:hover, .btn.on:hover { background: #2a4f9c; }
+
+@media (max-width: 640px) {
+  nav.top { gap: .8rem; }
+  .brand span { display: none; }
+}

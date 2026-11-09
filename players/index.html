@@ -5,35 +5,54 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ladue Player History</title>
 <meta name="description" content="How many people have been on the Ladue Minecraft server over time.">
+<script>if (window.top !== window) document.documentElement.className = "embed";</script>
+<link rel="stylesheet" href="/site-page.css">
 <style>
-  :root { color-scheme: dark; --bg:#050b18; --card:#0b1424; --line:#ffffff14; --text:#e8eefc; --dim:#8a9bb8; --blue:#6ea8ff; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
-  .bar { min-height: 48px; display: flex; align-items: center; padding: 8px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
-  .bar b { font-weight: 800; }
-  .bar a { margin-left: auto; color: #8fb4ff; text-decoration: none; }
-  main { max-width: 980px; margin: 0 auto; padding: 24px 16px 40px; }
-  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
-  .stat span { display: block; color: var(--dim); font-size: 13px; }
-  .stat b { display: block; font-size: 28px; font-variant-numeric: tabular-nums; }
-  .stat small { color: var(--dim); }
-  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
-  .head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
-  h1 { font-size: 18px; margin: 0; }
-  .ranges { margin-left: auto; display: flex; gap: 6px; }
-  button { background: transparent; color: var(--dim); border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; font: inherit; cursor: pointer; }
-  button.on { background: var(--blue); border-color: var(--blue); color: #06122a; font-weight: 700; }
+  main { max-width: 1120px; margin: 0 auto; padding: 2.2rem clamp(16px, 4vw, 40px) 3rem; }
+  h1 { font-family: var(--px); font-size: clamp(1.4rem, 3vw, 1.95rem); }
+  .lead { color: var(--muted); margin: .3rem 0 1.4rem; }
+  .embed body, .embed html { background: transparent; }
+  .embed nav.top, .embed .pagehead { display: none; }
+  .embed main { padding: 1rem; }
+  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin-bottom: .75rem; }
+  .stat, .panel { background: var(--panel); border: 2px solid var(--line); }
+  .stat { padding: .9rem 1.1rem; min-width: 0; }
+  .stat span { display: block; font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #9fb4e0; }
+  .stat b { display: block; margin-top: .25rem; font-family: var(--px); font-size: 1.6rem; color: #fff; }
+  .stat small { color: var(--muted); font-size: .8rem; }
+  .panel { padding: 1rem 1.1rem; }
+  .head { display: flex; flex-wrap: wrap; gap: .7rem; align-items: center; margin-bottom: .8rem; }
+  h2 { font-family: var(--px); font-size: 1.15rem; font-weight: 700; }
+  .ranges { margin-left: auto; display: flex; gap: .4rem; }
   #wrap { position: relative; }
-  svg { display: block; width: 100%; height: 320px; }
-  #tip { position: absolute; display: none; pointer-events: none; background: #162338; border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: 13px; white-space: nowrap; transform: translate(-50%, -115%); }
-  .note { color: var(--dim); font-size: 13px; margin: 12px 0 0; }
-  @media (max-width: 560px) { .stat b { font-size: 22px; } .stat { padding: 10px 12px; } svg { height: 240px; } }
+  svg { display: block; width: 100%; height: 320px; font-family: var(--ui); }
+  #tip { position: absolute; display: none; pointer-events: none; background: var(--panel2); border: 2px solid var(--line2); padding: .3rem .6rem; font-size: .8rem; white-space: nowrap; transform: translate(-50%, -115%); }
+  .note { color: var(--muted); font-size: .8rem; margin-top: .8rem; }
+  @media (max-width: 560px) {
+    .stat { padding: .7rem; } .stat b { font-size: 1.1rem; } .stat span { font-size: .6rem; letter-spacing: .06em; }
+    svg { height: 240px; } .ranges { margin-left: 0; }
+  }
 </style>
 </head>
 <body>
-  <div class="bar"><b>Ladue Player History</b><a href="/">Back to Ladue Client</a></div>
+  <nav class="top">
+    <a class="brand" href="/"><img src="/logo.png" alt=""><span>LADUE</span></a>
+    <div class="navlinks">
+      <a href="/#join">Server</a>
+      <a href="/map/">Map</a>
+      <a href="/#versions">Versions</a>
+      <a href="/#capes">Capes</a>
+      <a href="/players/" class=active>Players</a>
+      <a href="/#mods">Mods</a>
+      <a href="/#faq">FAQ</a>
+    </div>
+    <div class="navright"><a class="btn primary" href="/">Launcher</a></div>
+  </nav>
   <main>
+    <div class="pagehead">
+      <h1>Player history</h1>
+      <p class="lead">How many people have been on the Ladue server over time.</p>
+    </div>
     <div class="stats">
       <div class="stat"><span>Online now</span><b id="now">–</b></div>
       <div class="stat"><span>Peak in this view</span><b id="peak">–</b><small id="peakWhen"></small></div>
@@ -41,11 +60,11 @@
     </div>
     <div class="panel">
       <div class="head">
-        <h1>Players online</h1>
+        <h2>Players online</h2>
         <div class="ranges">
-          <button data-h="24">24 hours</button>
-          <button data-h="168">7 days</button>
-          <button data-h="0" class="on">All time</button>
+          <button class="btn" data-h="24">24 hours</button>
+          <button class="btn" data-h="168">7 days</button>
+          <button class="btn on" data-h="0">All time</button>
         </div>
       </div>
       <div id="wrap"><svg id="chart" role="img" aria-label="Players online over time"></svg><div id="tip"></div></div>
@@ -53,7 +72,6 @@
     </div>
   </main>
 <script>
-if (window.top !== window) document.querySelector(".bar").style.display = "none";
 const API = "https://map.ladue.cc.cd";
 const svg = document.getElementById("chart"), tip = document.getElementById("tip");
 let samples = [], range = 0, points = [];
@@ -82,16 +100,16 @@ function draw() {
   const x = i => L + (W - L - R) * (points.length < 2 ? 0 : i / (points.length - 1));
   const y = n => T + (H - T - B) * (1 - n / top);
   let g = "";
-  for (let v = 0; v <= top; v += top / 5) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#ffffff14"/><text x="${L - 6}" y="${y(v) + 4}" fill="#8a9bb8" font-size="11" text-anchor="end">${v}</text>`;
+  for (let v = 0; v <= top; v += top / 5) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="#1c3266"/><text x="${L - 6}" y="${y(v) + 4}" fill="#a9b7d6" font-size="11" text-anchor="end">${v}</text>`;
   const labels = W < 500 ? 3 : 6;
   for (let k = 0; k <= labels; k++) {
     const i = Math.round((points.length - 1) * k / labels);
     const o = range === 24 ? { hour: "numeric" } : { month: "short", day: "numeric" };
-    g += `<text x="${x(i)}" y="${H - 8}" fill="#8a9bb8" font-size="11" text-anchor="${k === 0 ? "start" : k === labels ? "end" : "middle"}">${fmt(points[i].t, o)}</text>`;
+    g += `<text x="${x(i)}" y="${H - 8}" fill="#a9b7d6" font-size="11" text-anchor="${k === 0 ? "start" : k === labels ? "end" : "middle"}">${fmt(points[i].t, o)}</text>`;
   }
   const line = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(p.n).toFixed(1)}`).join("");
   const area = `${line}L${x(points.length - 1)} ${y(0)}L${x(0)} ${y(0)}Z`;
-  svg.innerHTML = `${g}<path d="${area}" fill="#6ea8ff33"/><path d="${line}" fill="none" stroke="#6ea8ff" stroke-width="2" stroke-linejoin="round"/><circle id="dot" r="4" fill="#6ea8ff" visibility="hidden"/>`;
+  svg.innerHTML = `${g}<path d="${area}" fill="#3a5fae66"/><path d="${line}" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="miter"/><circle id="dot" r="4" fill="#ffffff" visibility="hidden"/>`;
   svg._x = x; svg._y = y; svg._L = L; svg._R = R; svg._W = W;
   const peak = points.reduce((a, b) => b.n > a.n ? b : a, points[0]);
   document.getElementById("peak").textContent = peak.n;

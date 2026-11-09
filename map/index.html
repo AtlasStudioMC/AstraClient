@@ -5,25 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Ladue Live Map</title>
 <meta name="description" content="Live map of the Ladue Minecraft server.">
+<link rel="stylesheet" href="/site-page.css">
 <style>
-  :root { color-scheme: dark; }
-  html, body { margin: 0; height: 100%; background: #050b18; color: #e8eefc;
-    font: 15px/1.4 system-ui, "Segoe UI", Roboto, sans-serif; }
-  .bar { height: 48px; box-sizing: border-box; display: flex; align-items: center; gap: 12px;
-    padding: 0 16px; background: #0b1424; border-bottom: 1px solid #ffffff14; }
-  .bar b { font-weight: 800; letter-spacing: .02em; }
-  .bar span { color: #8a9bb8; font-size: 13px; }
-  .bar a { margin-left: auto; color: #8fb4ff; text-decoration: none; white-space: nowrap; }
-  .bar a:hover { text-decoration: underline; }
-  iframe { display: block; width: 100%; height: calc(100% - 48px); border: 0; }
-  @media (max-width: 520px) { .bar span { display: none; } }
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; }
+  iframe { display: block; flex: 1; width: 100%; min-height: 0; border: 0; }
 </style>
 </head>
 <body>
-  <div class="bar">
-    <b>Ladue Live Map</b><span>Updates as people build. Online players show up live.</span>
-    <a href="/">Back to Ladue Client</a>
-  </div>
+  <nav class="top">
+    <a class="brand" href="/"><img src="/logo.png" alt=""><span>LADUE</span></a>
+    <div class="navlinks">
+      <a href="/#join">Server</a>
+      <a href="/map/" class=active>Map</a>
+      <a href="/#versions">Versions</a>
+      <a href="/#capes">Capes</a>
+      <a href="/players/">Players</a>
+      <a href="/#mods">Mods</a>
+      <a href="/#faq">FAQ</a>
+    </div>
+    <div class="navright"><a class="btn primary" href="/">Launcher</a></div>
+  </nav>
   <iframe src="https://map.ladue.cc.cd/" title="Ladue live map" referrerpolicy="no-referrer"></iframe>
 </body>
 </html>

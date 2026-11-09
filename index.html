@@ -387,7 +387,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .news li{border-left:2px solid #fff;padding-left:.6rem}.news b{display:block;color:#fff;font-size:.9rem}.news small{color:#a9b7d6;font-size:.8rem;line-height:1.35}
 @media (max-width:900px){#app .page[data-page=play].on{grid-template-columns:1fr}.playside{padding-bottom:2rem}}
 </style>
-<script>window.LADUE_SITE_VERSION="mw8pyd3n";
+<script>window.LADUE_SITE_VERSION="mw8qh2jq";
 /* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
    cached copy checks version.json (always fetched fresh) and reloads itself when the site changes. */
 (function(){
@@ -421,6 +421,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
       <a href="/map/">Map</a>
       <a href="#versions">Versions</a>
       <a href="#capes">Capes</a>
+      <a href="/players/">Players</a>
       <a href="#mods">Mods</a>
       <a href="#faq">FAQ</a>
       <a href="#" id="navAccountMobile" class="mobile-only-link"><i data-ico="user"></i><span>Log in</span></a>
@@ -578,6 +579,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
         <a href="#" data-launch>Launcher</a>
         <a href="#versions">Versions</a>
         <a href="#capes">Capes</a>
+        <a href="/players/">Player history</a>
       </div>
       <div>
         <h4>About</h4>
@@ -601,6 +603,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
       <button data-page="cosmetics"><i data-ico="cape"></i>Cosmetics</button>
       <button data-page="mods"><i data-ico="sliders"></i>Mods</button>
       <button data-page="map"><i data-ico="map"></i>Map</button>
+      <button data-page="players"><i data-ico="chart"></i>Players</button>
       <button data-page="settings"><i data-ico="gear"></i>Settings</button>
       <div class="spacer"></div>
       <button id="toSite"><i data-ico="home"></i>Website</button>
@@ -674,6 +677,12 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
           <div class="mcard on" id="hudLook"></div>
           <div class="mcard on"><div class="mrow"><b>HUD layout</b></div><small>Open the mod menu in game (Right Shift) and press Edit HUD layout to drag things anywhere.</small></div>
         </div>
+      </section>
+
+      <section class="page" data-page="players">
+        <h2>Player history</h2>
+        <p class="sub">How many people have been on the Ladue server over time. <a href="/players/" target="_blank" rel="noopener">Open it full screen</a></p>
+        <div class="mapframe"><iframe id="playersFrame" title="Ladue player history"></iframe></div>
       </section>
 
       <section class="page" data-page="map">
@@ -997,11 +1006,12 @@ $$(".reveal").forEach(el=>io.observe(el));
 /* ---------- launcher navigation ---------- */
 const app=$("#app");
 function openApp(page){app.classList.add("open");document.body.style.overflow="hidden";if(page)showPage(page)}
-function showPage(p){$$(".side [data-page]").forEach(b=>b.classList.toggle("on",b.dataset.page===p));$$(".page").forEach(s=>s.classList.toggle("on",s.dataset.page===p));mapFrame(p==="map")}
+function showPage(p){$$(".side [data-page]").forEach(b=>b.classList.toggle("on",b.dataset.page===p));$$(".page").forEach(s=>s.classList.toggle("on",s.dataset.page===p));mapFrame(p==="map");playersFrame(p==="players")}
+function playersFrame(on){const f=document.getElementById("playersFrame");if(!f)return;const want=on?"/players/":"about:blank";if(f.getAttribute("src")!==want)f.setAttribute("src",want)}
 function mapFrame(on){const f=document.getElementById("mapFrame");if(!f)return;const want=on?"https://map.ladue.cc.cd/":"about:blank";if(f.getAttribute("src")!==want)f.setAttribute("src",want)}
 $$("[data-launch]").forEach(b=>b.onclick=()=>{if(b.dataset.launch){sets.version=b.dataset.launch;save("astra.settings",sets);renderVersions()}openApp("play")});
 $$(".side [data-page]").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
-$("#toSite").onclick=()=>{app.classList.remove("open");mapFrame(false);document.body.style.overflow=""};
+$("#toSite").onclick=()=>{app.classList.remove("open");mapFrame(false);playersFrame(false);document.body.style.overflow=""};
 
 /* ---------- play page ---------- */
 function renderVersions(){
@@ -1169,6 +1179,7 @@ const ICONS={
   gear:["...##...",".######.","##.##.##","###..###","###..###","##.##.##",".######.","...##..."],
   sliders:["#..#....","####....","#..#....","....#..#","....####","....#..#","#..#....","####...."],
   home:["...##...","..####..",".######.","########",".##..##.",".##..##.",".######.","........"],
+  chart:["......##","......##","...##.##","...##.##","##.##.##","##.##.##","##.##.##","########"],
   map:["..####..",".######.",".##..##.",".##..##.",".######.","..####..","...##...","...##..."],
   brush:[".....###","....####","...####.","..####..",".###....","####....","###.....","##......"],
   users:[".##..##.","####.###","####.###",".##..##.","........","###.####","########","########"],

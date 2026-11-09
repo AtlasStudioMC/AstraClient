@@ -53,6 +53,7 @@
     </div>
   </main>
 <script>
+if (window.top !== window) document.querySelector(".bar").style.display = "none";
 const API = "https://map.ladue.cc.cd";
 const svg = document.getElementById("chart"), tip = document.getElementById("tip");
 let samples = [], range = 0, points = [];

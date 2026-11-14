@@ -387,7 +387,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .news li{border-left:2px solid #fff;padding-left:.6rem}.news b{display:block;color:#fff;font-size:.9rem}.news small{color:#a9b7d6;font-size:.8rem;line-height:1.35}
 @media (max-width:900px){#app .page[data-page=play].on{grid-template-columns:1fr}.playside{padding-bottom:2rem}}
 </style>
-<script>window.LADUE_SITE_VERSION="mwg2c0tb";
+<script>window.LADUE_SITE_VERSION="mwg2iu90";
 /* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
    cached copy checks version.json (always fetched fresh) and reloads itself when the site changes. */
 (function(){
@@ -746,7 +746,7 @@ async function unpack(id,onProgress){
     })()}});
   }else{
     // hosted build: download the gzipped game file
-    const res=await fetch('games/'+id+'.bin?v=cfd9fd2191',{cache:'no-cache'});
+    const res=await fetch('games/'+id+'.bin?v=a70255494a',{cache:'no-cache'});
     if(!res.ok)throw new Error('could not download game ('+res.status+')');
     const total=+res.headers.get('content-length')||0;let got=0;
     const reader=res.body.getReader();
@@ -917,7 +917,7 @@ async function installLaduePack(){
       try{const d=has.result&&has.result.data;if(d)list=nbtRead(new Uint8Array(d)).v.get('servers').v}catch(e){list=[]}
       const s=(e,k)=>{const x=e.v.get(k);return x?String(x.v):''};
       // drop old ArchMC entries and the launcher-made Ram-Craft entry; the game pins its own Ram-Craft entry
-      list=list.filter(e=>!/0.0.0.0|arch.mc|archmc/i.test(s(e,'ip')+' '+s(e,'name'))&&s(e,'ip')!=='ram-craft.net');
+      list=list.filter(e=>!/0.0.0.0|arch.mc|archmc/i.test(s(e,'ip')+' '+s(e,'name'))&&!['ram-craft.net','ladue.cc.cd'].includes(s(e,'ip')));
       put('servers.dat',nbtWrite({t:10,v:new Map([['servers',{t:9,et:10,v:list}]])}));
     };
     tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});

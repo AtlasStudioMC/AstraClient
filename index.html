@@ -387,7 +387,7 @@ nav.top{background:#060d22ee;border-bottom:2px solid #fff2}
 .news li{border-left:2px solid #fff;padding-left:.6rem}.news b{display:block;color:#fff;font-size:.9rem}.news small{color:#a9b7d6;font-size:.8rem;line-height:1.35}
 @media (max-width:900px){#app .page[data-page=play].on{grid-template-columns:1fr}.playside{padding-bottom:2rem}}
 </style>
-<script>window.LADUE_SITE_VERSION="mwg1uqzi";
+<script>window.LADUE_SITE_VERSION="mwg2c0tb";
 /* Auto-update: GitHub Pages lets browsers keep the page for up to 10 minutes, so an open or
    cached copy checks version.json (always fetched fresh) and reloads itself when the site changes. */
 (function(){
@@ -970,7 +970,7 @@ async function drawCape(canvas,cape){
 (function(){
   const c=document.getElementById("jCopy");if(!c)return;
   c.onclick=async()=>{try{await navigator.clipboard.writeText("ram-craft.net");c.textContent="Copied!"}catch(e){c.textContent="ram-craft.net"}setTimeout(()=>c.textContent="Copy",1500)};
-  fetch("https://map.ram-craft.net/status").then(r=>r.json()).then(d=>{
+  fetch("https://map.ladue.cc.cd/status").then(r=>r.json()).then(d=>{
     document.getElementById("jStatus").innerHTML=`<span class="jdot ${d.online?"on":"off"}"></span>${d.online?"Online":"Offline"}`;
     if(d.online&&d.players)document.getElementById("jPlayers").textContent=d.players.online+"/"+d.players.max;
   }).catch(()=>{});
@@ -1008,7 +1008,7 @@ const app=$("#app");
 function openApp(page){app.classList.add("open");document.body.style.overflow="hidden";if(page)showPage(page)}
 function showPage(p){$$(".side [data-page]").forEach(b=>b.classList.toggle("on",b.dataset.page===p));$$(".page").forEach(s=>s.classList.toggle("on",s.dataset.page===p));mapFrame(p==="map");playersFrame(p==="players")}
 function playersFrame(on){const f=document.getElementById("playersFrame");if(!f)return;const want=on?"/players/":"about:blank";if(f.getAttribute("src")!==want)f.setAttribute("src",want)}
-function mapFrame(on){const f=document.getElementById("mapFrame");if(!f)return;const want=on?"https://map.ram-craft.net/":"about:blank";if(f.getAttribute("src")!==want)f.setAttribute("src",want)}
+function mapFrame(on){const f=document.getElementById("mapFrame");if(!f)return;const want=on?"https://map.ladue.cc.cd/":"about:blank";if(f.getAttribute("src")!==want)f.setAttribute("src",want)}
 $$("[data-launch]").forEach(b=>b.onclick=()=>{if(b.dataset.launch){sets.version=b.dataset.launch;save("astra.settings",sets);renderVersions()}openApp("play")});
 $$(".side [data-page]").forEach(b=>b.onclick=()=>showPage(b.dataset.page));
 $("#toSite").onclick=()=>{app.classList.remove("open");mapFrame(false);playersFrame(false);document.body.style.overflow=""};
@@ -1164,7 +1164,7 @@ $("#playBtn").onclick=async()=>{
 /* ---------- launcher: Ram-Craft server card ---------- */
 (function(){
   const dot=$("#srvDot"),out=$("#srvPlayers");if(!dot)return;
-  function check(){fetch("https://map.ram-craft.net/status").then(r=>r.json()).then(d=>{
+  function check(){fetch("https://map.ladue.cc.cd/status").then(r=>r.json()).then(d=>{
     if(d.online&&d.players){dot.className="sdot on";out.textContent=d.players.online+" / "+d.players.max+" online"}
     else{dot.className="sdot off";out.textContent="Offline"}}).catch(()=>{out.textContent="Status unavailable"})}
   check();setInterval(check,60000);
@@ -1209,7 +1209,7 @@ function paintIcons(root){(root||document).querySelectorAll("i[data-ico]:not([da
 new MutationObserver(()=>paintIcons()).observe(document.body,{childList:true,subtree:true});
 
 /* ---------- accounts + cloud presets ---------- */
-const API=location.protocol.startsWith("http")?"https://accounts.ram-craft.net":null; // accounts live on their own Worker (ladue-accounts)
+const API=location.protocol.startsWith("http")?"https://accounts.ladue.cc.cd":null; // accounts live on their own Worker (ladue-accounts)
 let syncTimer=null,mode="login";
 async function api(path,opts={}){
   const res=await fetch(API+path,{...opts,headers:{"content-type":"application/json",...(session.token?{authorization:"Bearer "+session.token}:{})}});

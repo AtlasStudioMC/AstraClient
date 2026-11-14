@@ -192,7 +192,7 @@
   }
   function checkPlayers() {
     if (!cfg.players || document.hidden) return;
-    fetch("https://map.ram-craft.net/status").then(function (r) { return r.json(); }).then(function (d) {
+    fetch("https://map.ladue.cc.cd/status").then(function (r) { return r.json(); }).then(function (d) {
       pills.players.textContent = d.online && d.players ? "Ram-Craft " + d.players.online + "/" + d.players.max + " online" : "Ram-Craft offline";
     }).catch(function () {});
   }

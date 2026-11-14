@@ -164,7 +164,7 @@ async function applyCosmetics(v,cos){
     localStorage.setItem(key,btoa(bin));
   }catch(e){console.warn('Astra: could not apply cosmetics',e)}
 }
-// ---- Ladue resource pack, built in for 26.3 ----
+// ---- Ram-Craft resource pack, built in for 26.3 ----
 // Writes the pack into the game's own file store and turns it on, once per browser, so a
 // player who later switches it off in Options keeps it off.
 const LADUE_PACK='ladue';
@@ -184,8 +184,8 @@ async function installLaduePack(){
       let list=[];
       try{const d=has.result&&has.result.data;if(d)list=nbtRead(new Uint8Array(d)).v.get('servers').v}catch(e){list=[]}
       const s=(e,k)=>{const x=e.v.get(k);return x?String(x.v):''};
-      // drop old ArchMC entries and the launcher-made Ladue entry; the game pins its own Ladue entry
-      list=list.filter(e=>!/0.0.0.0|arch.mc|archmc/i.test(s(e,'ip')+' '+s(e,'name'))&&s(e,'ip')!=='ladue.cc.cd');
+      // drop old ArchMC entries and the launcher-made Ram-Craft entry; the game pins its own Ram-Craft entry
+      list=list.filter(e=>!/0.0.0.0|arch.mc|archmc/i.test(s(e,'ip')+' '+s(e,'name'))&&s(e,'ip')!=='ram-craft.net');
       put('servers.dat',nbtWrite({t:10,v:new Map([['servers',{t:9,et:10,v:list}]])}));
     };
     tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});

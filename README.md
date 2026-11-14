@@ -1,10 +1,10 @@
-# Ladue Client
+# Ram-Craft Client
 
-Live at https://client.ladue.cc.cd
+Live at https://notagame.ram-craft.net
 
-Browser Minecraft launcher website with a blue Ladue title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
+Browser Minecraft launcher website with a blue Ram-Craft title screen, built-in capes, an in-game mod menu (Right Shift) and optional accounts that save your presets.
 
-Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2 in the browser, plus 26.2 (Java Edition) on the Ladue server.
+Versions: 1.8.8 (JS and WASM-GC), 1.12.2 and 1.5.2 in the browser, plus 26.2 (Java Edition) on the Ram-Craft server.
 
 ## Legal
 

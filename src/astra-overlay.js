@@ -1,4 +1,4 @@
-/* Ladue Client in-game overlay: mod menu (Right Shift), HUD mods with drag-to-move, cosmetics */
+/* Ram-Craft Client in-game overlay: mod menu (Right Shift), HUD mods with drag-to-move, cosmetics */
 (function () {
   "use strict";
   var MODS_KEY = "astra.mods", COS_KEY = "astra.cosmetics";
@@ -7,7 +7,7 @@
     crosshair: false, crosshairStyle: "plus", zoom: true, zoomKey: "KeyC", zoomLevel: 3,
     filter: false, brightness: 110, saturation: 115, fullscreenKey: true,
     afk: false, afkMinutes: 5, titleFlash: false,
-    ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ladue Rams",
+    ping: true, players: false, date: false, stopwatch: false, stopwatchKey: "KeyJ", customText: false, customTextValue: "Ram-Craft Rams",
     breakReminder: false, breakMinutes: 30, hideHudKey: true, filterPreset: "custom",
     hudColor: "#ffffff", hudBg: 60, hudScale: 100, menuButton: true
   };
@@ -171,16 +171,16 @@
     pills.date.textContent = new Date().toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
     var sw = swRunning ? swAcc + (t - swStart) : swAcc, ss = Math.floor(sw / 100);
     pills.stopwatch.textContent = (swRunning ? "▶ " : "⏸ ") + Math.floor(ss / 600) + ":" + ("0" + Math.floor(ss / 10) % 60).slice(-2) + "." + ss % 10;
-    pills.customText.textContent = cfg.customTextValue || "Ladue";
+    pills.customText.textContent = cfg.customTextValue || "Ram-Craft";
     requestAnimationFrame(loop);
   })(performance.now());
-  /* ping: round trip to the Ladue relay; players: who is on the Ladue server */
-  pills.ping.textContent = "Ping ..."; pills.players.textContent = "Ladue ...";
+  /* ping: round trip to the Ram-Craft relay; players: who is on the Ram-Craft server */
+  pills.ping.textContent = "Ping ..."; pills.players.textContent = "Ram-Craft ...";
   var pings = [];
   function measurePing() {
     if (!cfg.ping || document.hidden) return;
     var t0 = performance.now();
-    fetch("https://ladue.cc.cd/?ping=" + Date.now(), { cache: "no-store", mode: "no-cors" })
+    fetch("https://ram-craft.net/?ping=" + Date.now(), { cache: "no-store", mode: "no-cors" })
       .then(function () {
         // average the last few samples so the number doesn't jump around
         pings.push(performance.now() - t0); if (pings.length > 4) pings.shift();
@@ -192,8 +192,8 @@
   }
   function checkPlayers() {
     if (!cfg.players || document.hidden) return;
-    fetch("https://map.ladue.cc.cd/status").then(function (r) { return r.json(); }).then(function (d) {
-      pills.players.textContent = d.online && d.players ? "Ladue " + d.players.online + "/" + d.players.max + " online" : "Ladue offline";
+    fetch("https://map.ram-craft.net/status").then(function (r) { return r.json(); }).then(function (d) {
+      pills.players.textContent = d.online && d.players ? "Ram-Craft " + d.players.online + "/" + d.players.max + " online" : "Ram-Craft offline";
     }).catch(function () {});
   }
   var wasPing = cfg.ping, wasPlayers = cfg.players;
@@ -289,7 +289,7 @@
   }, 2000);
   if (typeof document.hidden !== "undefined") {
     document.addEventListener("visibilitychange", function () {
-      if (cfg.titleFlash && document.hidden) startFlash("Come back to Ladue!");
+      if (cfg.titleFlash && document.hidden) startFlash("Come back to Ram-Craft!");
       else if (!cfg.afk || Date.now() - lastActivity <= cfg.afkMinutes * 60000) stopFlash();
     });
   }
@@ -313,8 +313,8 @@
     { id: "afk", name: "AFK Alert", cat: "Utility", desc: "Flashes the tab title if you go idle.",
       opts: [["afkMinutes", "Minutes", "range", [1, 30, 1]]] },
     { id: "titleFlash", name: "Focus Reminder", cat: "Utility", desc: "Flashes the tab title when you tab away." },
-    { id: "ping", name: "Ping", cat: "HUD", desc: "Round trip to the Ladue server relay, updated every 5 seconds." },
-    { id: "players", name: "Ladue Players", cat: "HUD", desc: "How many people are on the Ladue server right now." },
+    { id: "ping", name: "Ping", cat: "HUD", desc: "Round trip to the Ram-Craft server relay, updated every 5 seconds." },
+    { id: "players", name: "Ram-Craft Players", cat: "HUD", desc: "How many people are on the Ram-Craft server right now." },
     { id: "date", name: "Date", cat: "HUD", desc: "Today's date." },
     { id: "stopwatch", name: "Stopwatch", cat: "HUD", desc: "Press the key to start or pause. Shift + key resets.",
       opts: [["stopwatchKey", "Key", "select", [["KeyJ", "J"], ["KeyK", "K"], ["KeyH", "H"], ["F6", "F6"], ["F7", "F7"]]]] },
@@ -329,7 +329,7 @@
 
   var menu = el("div"); menu.id = "ax-menu";
   var win = el("div", "ax-win");
-  var side = el("div", "ax-side", '<div class="ax-logo">LADUE<small>CLIENT 26.2</small></div>');
+  var side = el("div", "ax-side", '<div class="ax-logo">RAM-CRAFT<small>CLIENT 26.2</small></div>');
   var main = el("div", "ax-main");
   var top = el("div", "ax-top");
   var title = el("h3", "", "All mods");
@@ -344,7 +344,7 @@
   resetBtn.style.background = "#1a2b47"; resetBtn.style.color = "#fff";
   editbar.appendChild(resetBtn); editbar.appendChild(doneBtn);
   // small "Mods" button in the corner while the mouse is free (menus, chat), for keyboards without Right Shift
-  var fab = el("button", "", "☰ Mods"); fab.id = "ax-fab"; fab.title = "Ladue mods (Right Shift)";
+  var fab = el("button", "", "☰ Mods"); fab.id = "ax-fab"; fab.title = "Ram-Craft mods (Right Shift)";
   ROOT.appendChild(menu); ROOT.appendChild(editbar); ROOT.appendChild(fab);
   function loading() { var l = document.getElementById("loading_screen"); return !!(l && l.offsetParent); }
   function fabSync() { fab.style.display = cfg.menuButton && !loading() && !inWorld() && !menu.classList.contains("open") && gameCanvas() ? "block" : "none"; }
@@ -442,7 +442,7 @@
 
   function drawCosmetics() {
     var capes = window.ASTRA_CAPES || [];
-    body.appendChild(el("div", "ax-note", "Pick a cape here or in the Ladue launcher. It's put on your player the next time you launch the game from Ladue."));
+    body.appendChild(el("div", "ax-note", "Pick a cape here or in the Ram-Craft launcher. It's put on your player the next time you launch the game from Ram-Craft."));
     [{ id: "", name: "None" }].concat(capes).forEach(function (c) {
       var b = el("button", "ax-cape" + ((cos.cape || "") === c.id ? " on" : ""));
       var cv = el("canvas"); cv.width = 10; cv.height = 16;
@@ -507,7 +507,7 @@
   // first few launches: tell people where the mods are
   try {
     var seen = +(localStorage.getItem("ladue.tipSeen") || 0);
-    if (seen < 3) { localStorage.setItem("ladue.tipSeen", seen + 1); setTimeout(function () { toast("Press Right Shift for Ladue mods", 5000); }, 8000); }
+    if (seen < 3) { localStorage.setItem("ladue.tipSeen", seen + 1); setTimeout(function () { toast("Press Right Shift for Ram-Craft mods", 5000); }, 8000); }
   } catch (e) {}
   // the game rebuilds the page on boot; keep our elements attached, filters applied and the stack tidy
   setInterval(function () {
